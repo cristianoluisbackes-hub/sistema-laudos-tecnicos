@@ -10,7 +10,7 @@ export default function LoginSupabase({ onLoginSuccess }) {
   const [nome, setNome] = useState('');
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState('');
-  const [modo, setModo] = useState('login'); // 'login' ou 'registrar'
+  const [modo, setModo] = useState('login'); // 'login' | 'registrar' | 'confirmar'
 
   // Login com Email/Senha
   const handleLogin = async (e) => {
@@ -37,12 +37,15 @@ export default function LoginSupabase({ onLoginSuccess }) {
     setErro('');
 
     try {
-      const user = await registrar(email, senha, nome);
-      console.log('✅ Registro bem-sucedido:', user.email);
-      onLoginSuccess(user);
+      const { user, session } = await registrar(email, senha, nome);
+      if (session) {
+        onLoginSuccess(user);
+      } else {
+        // Supabase com confirmação de email obrigatória
+        setModo('confirmar');
+      }
     } catch (error) {
       setErro(error.message || 'Erro ao registrar');
-      console.error('❌ Erro ao registrar:', error);
     } finally {
       setLoading(false);
     }
@@ -54,7 +57,7 @@ export default function LoginSupabase({ onLoginSuccess }) {
     setErro('');
 
     try {
-      const result = await loginComGoogle();
+      await loginComGoogle();
       console.log('✅ Login Google iniciado');
       // Supabase redireciona automaticamente
     } catch (error) {
@@ -78,7 +81,22 @@ export default function LoginSupabase({ onLoginSuccess }) {
           </div>
         )}
 
-        {modo === 'login' ? (
+        {modo === 'confirmar' ? (
+          <div className="text-center space-y-4">
+            <p className="text-5xl">📧</p>
+            <h2 className="text-lg font-semibold text-gray-800">Confirme seu email</h2>
+            <p className="text-gray-600 text-sm">
+              Enviamos um link de confirmação para <strong>{email}</strong>.<br/>
+              Clique no link do email para ativar sua conta.
+            </p>
+            <button
+              onClick={() => setModo('login')}
+              className="text-blue-600 hover:text-blue-700 text-sm font-semibold underline"
+            >
+              Voltar para o login
+            </button>
+          </div>
+        ) : modo === 'login' ? (
           // FORMULÁRIO DE LOGIN
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
@@ -163,38 +181,42 @@ export default function LoginSupabase({ onLoginSuccess }) {
           </form>
         )}
 
-        {/* Divider */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Ou continue com</span>
-          </div>
-        </div>
+        {modo !== 'confirmar' && (
+          <>
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Ou continue com</span>
+              </div>
+            </div>
 
-        {/* Login Google */}
-        <button
-          onClick={handleLoginGoogle}
-          disabled={loading}
-          className="w-full bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          🔵 Google
-        </button>
-
-        {/* Toggle entre Login e Registro */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm">
-            {modo === 'login' ? 'Não tem conta? ' : 'Já tem conta? '}
+            {/* Login Google */}
             <button
-              type="button"
-              onClick={() => setModo(modo === 'login' ? 'registrar' : 'login')}
-              className="text-blue-600 hover:text-blue-700 font-semibold"
+              onClick={handleLoginGoogle}
+              disabled={loading}
+              className="w-full bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {modo === 'login' ? 'Registre-se' : 'Faça login'}
+              🔵 Google
             </button>
-          </p>
-        </div>
+
+            {/* Toggle entre Login e Registro */}
+            <div className="mt-6 text-center">
+              <p className="text-gray-600 text-sm">
+                {modo === 'login' ? 'Não tem conta? ' : 'Já tem conta? '}
+                <button
+                  type="button"
+                  onClick={() => setModo(modo === 'login' ? 'registrar' : 'login')}
+                  className="text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  {modo === 'login' ? 'Registre-se' : 'Faça login'}
+                </button>
+              </p>
+            </div>
+          </>
+        )}
 
         {/* Footer */}
         <div className="mt-6 pt-6 border-t border-gray-200">
