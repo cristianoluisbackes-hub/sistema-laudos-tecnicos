@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import Link from 'next/link';
 import LoginSupabase from '@/components/LoginSupabase';
+import { supabase } from '@/lib/supabaseClient';
 import {
-  obterUsuarioLogado,
   logout,
   obterEstatisticas,
   meuHistoricoLaudos,
@@ -47,20 +47,16 @@ export default function Home() {
   const [filtroCliente, setFiltroCliente] = useState('');
 
   useEffect(() => {
-    checkUser();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        const u = session?.user ?? null;
+        setUser(u);
+        if (u) await carregarDados();
+        setLoading(false);
+      }
+    );
+    return () => subscription.unsubscribe();
   }, []);
-
-  async function checkUser() {
-    try {
-      const usuario = await obterUsuarioLogado();
-      setUser(usuario);
-      if (usuario) await carregarDados();
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function carregarDados(filtros: Record<string, string> = {}) {
     setLoadingLaudos(true);
@@ -119,14 +115,7 @@ export default function Home() {
   }
 
   if (!user) {
-    return (
-      <LoginSupabase
-        onLoginSuccess={(u: any) => {
-          setUser(u);
-          carregarDados();
-        }}
-      />
-    );
+    return <LoginSupabase onLoginSuccess={() => {}} />;
   }
 
   return (

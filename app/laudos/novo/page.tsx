@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabaseClient';
 import {
   criarLaudo,
   adicionarAnalise,
@@ -40,8 +41,16 @@ type TemplateKey = keyof typeof TEMPLATES;
 
 export default function NovoLaudo() {
   const router = useRouter();
+  const [authReady, setAuthReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) router.replace('/');
+      else setAuthReady(true);
+    });
+  }, [router]);
   const [template, setTemplate] = useState<TemplateKey>('completo');
   const [form, setForm] = useState({
     cliente: '',
@@ -80,6 +89,14 @@ export default function NovoLaudo() {
   }
 
   const tmpl = TEMPLATES[template];
+
+  if (!authReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-400">Verificando sessão...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

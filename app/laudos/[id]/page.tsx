@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabaseClient';
 import {
   getLaudo,
   getAnalises,
@@ -90,8 +91,11 @@ export default function LaudoDetalhe() {
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
-    if (id) carregar();
-  }, [id]);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) router.replace('/');
+      else if (id) carregar();
+    });
+  }, [id, router]);
 
   async function carregar() {
     setLoading(true);
