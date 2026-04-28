@@ -5,8 +5,8 @@ import LoginSupabase from '@/components/LoginSupabase';
 import { obterUsuarioLogado, logout } from '@/lib/laudosServiceSupabase';
 
 export default function Home() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+const [user, setUser] = useState(null);
+const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     checkUser();
