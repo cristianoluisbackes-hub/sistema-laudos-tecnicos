@@ -8,6 +8,11 @@ ALTER TABLE analises ADD COLUMN IF NOT EXISTS norma     TEXT;
 ALTER TABLE analises ADD COLUMN IF NOT EXISTS tipo_foto TEXT DEFAULT 'optional';
 ALTER TABLE analises ADD COLUMN IF NOT EXISTS foto_url  TEXT;
 
+-- ── 1b. Garantir que resultado seja TEXT (o app trata como string) ──
+--       Se a coluna for NUMERIC, strings vazias causam erro no INSERT.
+ALTER TABLE analises
+  ALTER COLUMN resultado TYPE TEXT USING resultado::TEXT;
+
 -- ── 2. Habilitar RLS nas tabelas ───────────────────────────
 ALTER TABLE laudos   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE analises ENABLE ROW LEVEL SECURITY;

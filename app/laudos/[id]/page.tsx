@@ -142,7 +142,7 @@ export default function LaudoDetalhe() {
     try {
       const criada = await adicionarAnalise(id, {
         ...novaAnalise,
-        resultado: '',
+        resultado: null,
         status_analise: null,
         foto_url: null,
       });

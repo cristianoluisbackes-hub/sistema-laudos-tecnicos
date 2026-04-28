@@ -84,7 +84,7 @@ export default function NovoLaudo() {
             norma: a.norma,
             specification: a.specification,
             tipo_foto: a.tipo_foto,
-            resultado: '',
+            resultado: null,
             status_analise: null,
             foto_url: null,
           })
