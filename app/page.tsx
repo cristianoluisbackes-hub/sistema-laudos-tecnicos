@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { User } from '@supabase/supabase-js';
 import LoginSupabase from '@/components/LoginSupabase';
 import { obterUsuarioLogado, logout } from '@/lib/laudosServiceSupabase';
 
 export default function Home() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
