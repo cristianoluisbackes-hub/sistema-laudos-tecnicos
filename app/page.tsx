@@ -38,7 +38,7 @@ export default function Home() {
   }
 
   if (!user) {
-    return <LoginSupabase onLoginSuccess={(u) => setUser(u)} />;
+   return <LoginSupabase onLoginSuccess={(u: any) => setUser(u)} />;
   }
 
   return (
