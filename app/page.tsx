@@ -5,17 +5,22 @@ import LoginSupabase from '@/components/LoginSupabase';
 import { obterUsuarioLogado, logout } from '@/lib/laudosServiceSupabase';
 
 export default function Home() {
-const [user, setUser] = useState(null);
-const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     checkUser();
   }, []);
 
   const checkUser = async () => {
-    const usuario = await obterUsuarioLogado();
-    setUser(usuario);
-    setLoading(false);
+    try {
+      const usuario = await obterUsuarioLogado();
+      setUser(usuario);
+    } catch (error) {
+      console.error('Erro ao verificar usuário:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -41,7 +46,7 @@ const [loading, setLoading] = useState(true);
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-blue-600">📊 Laudos Técnicos</h1>
           <div className="flex items-center gap-4">
-            <p className="text-gray-700">👋 {user.email}</p>
+            <p className="text-gray-700">👋 {user?.email}</p>
             <button
               onClick={handleLogout}
               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
@@ -59,7 +64,7 @@ const [loading, setLoading] = useState(true);
             Sistema de Laudos Técnicos conectado ao Supabase com sucesso! ✅
           </p>
           <p className="text-lg font-semibold text-blue-600">
-            Seu email: {user.email}
+            Seu email: {user?.email}
           </p>
 
           <div className="mt-8 p-6 bg-blue-50 rounded-lg border-l-4 border-blue-600">
@@ -67,6 +72,7 @@ const [loading, setLoading] = useState(true);
             <ul className="text-left space-y-2 text-gray-700">
               <li>✅ Autenticação funcionando</li>
               <li>✅ Banco de dados Supabase conectado</li>
+              <li>✅ Publicado no Vercel</li>
               <li>⏳ Implementar Dashboard de laudos</li>
               <li>⏳ Criar tela de novo laudo</li>
               <li>⏳ Upload de fotos</li>
