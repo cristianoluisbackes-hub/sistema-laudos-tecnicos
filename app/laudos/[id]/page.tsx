@@ -12,7 +12,7 @@ import {
   atualizarAnalise,
   deletarAnalise,
   finalizarLaudo,
-  uploadFoto,
+  // uploadFoto, — REMOVIDO: fotos desabilitadas temporariamente
 } from '@/lib/laudosServiceSupabase';
 import { avaliarStatus, calcularStatusGeral } from '@/lib/avaliarAnalise';
 
@@ -86,9 +86,9 @@ export default function LaudoDetalhe() {
   const [novaAnalise, setNovaAnalise] = useState(BLANK_ANALISE);
   const [adicionando, setAdicionando] = useState(false);
 
-  // Photo upload state per analysis id
-  const [uploading, setUploading] = useState<Record<string, boolean>>({});
-  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  // Removed: Photo upload state per analysis id
+  // const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  // const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -169,34 +169,35 @@ export default function LaudoDetalhe() {
     setAnalises((prev) => prev.filter((a) => a.id !== analiseId));
   }
 
-  // ── Foto ──────────────────────────────────────────────────────
-  async function handleFotoChange(analise: Analise, file: File) {
-    setUploading((prev) => ({ ...prev, [analise.id]: true }));
-    try {
-      const url = await uploadFoto(id, analise.id, file);
-      await atualizarAnalise(analise.id, { foto_url: url });
-      setAnalises((prev) => prev.map((a) => (a.id === analise.id ? { ...a, foto_url: url } : a)));
-      flash('Foto enviada.');
-    } catch (err: any) {
-      flash(`Erro: ${err.message}`);
-    } finally {
-      setUploading((prev) => ({ ...prev, [analise.id]: false }));
-    }
-  }
+  // ── Foto ────────────────────────────────────────────────────── [DESABILITADO]
+  // async function handleFotoChange(analise: Analise, file: File) {
+  //   setUploading((prev) => ({ ...prev, [analise.id]: true }));
+  //   try {
+  //     const url = await uploadFoto(id, analise.id, file);
+  //     await atualizarAnalise(analise.id, { foto_url: url });
+  //     setAnalises((prev) => prev.map((a) => (a.id === analise.id ? { ...a, foto_url: url } : a)));
+  //     flash('Foto enviada.');
+  //   } catch (err: any) {
+  //     flash(`Erro: ${err.message}`);
+  //   } finally {
+  //     setUploading((prev) => ({ ...prev, [analise.id]: false }));
+  //   }
+  // }
 
   // ── Finalizar ─────────────────────────────────────────────────
   async function handleFinalizar() {
     if (!laudo) return;
 
-    const faltamFotos = analises.filter(
-      (a) => a.tipo_foto === 'required' && !a.foto_url
-    );
-    if (faltamFotos.length > 0) {
-      alert(
-        `Faltam fotos obrigatórias em:\n${faltamFotos.map((a) => `• ${a.nome}`).join('\n')}`
-      );
-      return;
-    }
+    // DESABILITADO: Validação de fotos obrigatórias
+    // const faltamFotos = analises.filter(
+    //   (a) => a.tipo_foto === 'required' && !a.foto_url
+    // );
+    // if (faltamFotos.length > 0) {
+    //   alert(
+    //     `Faltam fotos obrigatórias em:\n${faltamFotos.map((a) => `• ${a.nome}`).join('\n')}`
+    //   );
+    //   return;
+    // }
 
     const statusGeral = calcularStatusGeral(
       analises.map((a) => ({
@@ -549,8 +550,8 @@ export default function LaudoDetalhe() {
                       </div>
                     </div>
 
-                    {/* Photo section */}
-                    {analise.tipo_foto !== 'none' && (
+                    {/* Photo section — DESABILITADO TEMPORARIAMENTE */}
+                    {/* {analise.tipo_foto !== 'none' && (
                       <div className="mt-3 pt-3 border-t border-gray-200 flex items-center gap-4 flex-wrap">
                         {analise.foto_url ? (
                           <a
@@ -605,7 +606,7 @@ export default function LaudoDetalhe() {
                           </div>
                         )}
                       </div>
-                    )}
+                    )} */}
                   </div>
                 );
               })}
