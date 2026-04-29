@@ -12,6 +12,7 @@ import {
   atualizarAnalise,
   deletarAnalise,
   finalizarLaudo,
+  IDIOMAS_DISPONIVEIS,
   // uploadFoto, — REMOVIDO: fotos desabilitadas temporariamente
 } from '@/lib/laudosServiceSupabase';
 import { avaliarStatus, calcularStatusGeral } from '@/lib/avaliarAnalise';
@@ -76,6 +77,7 @@ export default function LaudoDetalhe() {
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [msg, setMsg] = useState('');
+  const [idiomaSelecionado, setIdiomaSelecionado] = useState('pt-BR');
 
   // Inline laudo edit
   const [editandoInfo, setEditandoInfo] = useState(false);
@@ -216,7 +218,7 @@ export default function LaudoDetalhe() {
 
     setSalvando(true);
     try {
-      await finalizarLaudo(laudo.id, null, statusGeral);
+      await finalizarLaudo(laudo.id, null, statusGeral, idiomaSelecionado);
       await carregar();
       flash('Laudo finalizado.');
     } finally {
@@ -616,36 +618,66 @@ export default function LaudoDetalhe() {
 
         {/* Result summary */}
         {analises.length > 0 && (
-          <div
-            className={`rounded-xl p-6 text-center ${
-              statusGeral === 'approved'
-                ? 'bg-green-600'
-                : statusGeral === 'rejected'
-                ? 'bg-red-600'
-                : 'bg-gray-200'
-            }`}
-          >
-            <p
-              className={`text-3xl font-bold ${
-                statusGeral === 'draft' ? 'text-gray-600' : 'text-white'
+          <>
+            {/* Seletor de Idioma */}
+            {!finalizado && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <label className="block text-sm font-semibold text-gray-800 mb-3">
+                  Idioma do Laudo
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {IDIOMAS_DISPONIVEIS.map((idioma) => (
+                    <button
+                      key={idioma.codigo}
+                      onClick={() => setIdiomaSelecionado(idioma.codigo)}
+                      className={`p-3 rounded-lg border-2 transition text-sm font-medium ${
+                        idiomaSelecionado === idioma.codigo
+                          ? 'border-blue-600 bg-blue-50 text-blue-900'
+                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      {idioma.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  ℹ️ Selecione o idioma para o PDF do laudo
+                </p>
+              </div>
+            )}
+
+            {/* Resultado Final */}
+            <div
+              className={`rounded-xl p-6 text-center ${
+                statusGeral === 'approved'
+                  ? 'bg-green-600'
+                  : statusGeral === 'rejected'
+                  ? 'bg-red-600'
+                  : 'bg-gray-200'
               }`}
             >
-              {statusGeral === 'approved'
-                ? '✅ LAUDO APROVADO'
-                : statusGeral === 'rejected'
-                ? '❌ LAUDO REPROVADO'
-                : '⏳ AGUARDANDO RESULTADOS'}
-            </p>
-            {!finalizado && statusGeral !== 'draft' && (
-              <button
-                onClick={handleFinalizar}
-                disabled={salvando}
-                className="mt-4 bg-white text-gray-900 font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+              <p
+                className={`text-3xl font-bold ${
+                  statusGeral === 'draft' ? 'text-gray-600' : 'text-white'
+                }`}
               >
-                {salvando ? 'Finalizando...' : 'Finalizar e Registrar'}
-              </button>
-            )}
-          </div>
+                {statusGeral === 'approved'
+                  ? '✅ LAUDO APROVADO'
+                  : statusGeral === 'rejected'
+                  ? '❌ LAUDO REPROVADO'
+                  : '⏳ AGUARDANDO RESULTADOS'}
+              </p>
+              {!finalizado && statusGeral !== 'draft' && (
+                <button
+                  onClick={handleFinalizar}
+                  disabled={salvando}
+                  className="mt-4 bg-white text-gray-900 font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                >
+                  {salvando ? 'Finalizando...' : 'Finalizar e Registrar'}
+                </button>
+              )}
+            </div>
+          </>
         )}
       </main>
     </div>
