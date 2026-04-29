@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { criarLaudo, adicionarAnalise } from '@/lib/laudosServiceSupabase';
-import { TEMPLATES, TIPO_FOTO_LABEL } from '@/lib/templates';
+import { criarLaudo, adicionarAnalise, listarTemplates, obterTemplate } from '@/lib/laudosServiceSupabase';
 
 const BLANK_ANALISE = { nome: '', norma: '', specification: '', tipo_foto: 'optional' };
+
+const TIPO_FOTO_LABEL = {
+  required: 'Foto obrigatória',
+  optional: 'Foto opcional',
+  none: 'Sem foto',
+};
 
 const COR_MAP = {
   blue: { card: 'border-blue-400 bg-blue-50', badge: 'bg-blue-100 text-blue-800', btn: 'ring-blue-500' },
@@ -19,6 +24,8 @@ export default function NovoLaudo() {
   const [passo, setPasso] = useState(1);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
+  const [carregandoTemplates, setCarregandoTemplates] = useState(true);
+  const [templates, setTemplates] = useState([]);
 
   // Passo 1 — dados básicos
   const [info, setInfo] = useState({
@@ -30,6 +37,23 @@ export default function NovoLaudo() {
   const [analises, setAnalises] = useState([]);
   const [adicionando, setAdicionando] = useState(false);
   const [novaAnalise, setNovaAnalise] = useState(BLANK_ANALISE);
+
+  // ── Carregar templates dinâmicos ──
+  useEffect(() => {
+    async function carregarTemplates() {
+      setCarregandoTemplates(true);
+      try {
+        const dados = await listarTemplates();
+        setTemplates(dados);
+      } catch (err) {
+        setErro(err.message || 'Erro ao carregar templates');
+      } finally {
+        setCarregandoTemplates(false);
+      }
+    }
+
+    carregarTemplates();
+  }, []);
 
   // ── Passo 1 ──────────────────────────────────────────────────
   function handleInfoChange(field, value) {
@@ -46,9 +70,27 @@ export default function NovoLaudo() {
   }
 
   // ── Passo 2 — templates ──────────────────────────────────────
-  function selecionarTemplate(tpl) {
+  async function selecionarTemplate(tpl) {
     setTemplateId(tpl.id);
-    setAnalises(tpl.analises.map((a) => ({ ...a })));
+    
+    // Obter template completo com análises do banco
+    try {
+      const templateCompleto = await obterTemplate(tpl.id);
+      
+      // Mapear análises do banco para o formato esperado
+      const analisesFormatadas = templateCompleto.analises.map((a) => ({
+        id: a.id,
+        nome: a.nome,
+        norma: a.norma?.codigo || '',
+        specification: a.specification || '',
+        tipo_foto: a.tipo_foto || 'optional',
+      }));
+      
+      setAnalises(analisesFormatadas);
+    } catch (err) {
+      setErro(err.message || 'Erro ao carregar template');
+      setTemplateId('');
+    }
   }
 
   function handleAnaliseChange(idx, field, value) {
@@ -192,26 +234,44 @@ export default function NovoLaudo() {
             {/* Template selector */}
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="font-semibold text-gray-800 mb-4">Selecione o Template</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {TEMPLATES.map((tpl) => {
-                  const c = COR_MAP[tpl.cor];
-                  const ativo = templateId === tpl.id;
-                  return (
-                    <button
-                      key={tpl.id}
-                      onClick={() => selecionarTemplate(tpl)}
-                      className={`text-left p-4 rounded-xl border-2 transition ${
-                        ativo ? `${c.card} ${c.btn} ring-2` : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      <p className="font-semibold text-sm text-gray-900">{tpl.nome}</p>
-                      <p className="text-xs text-gray-500 mt-1">{tpl.descricao}</p>
-                      <span className={`inline-block text-xs px-2 py-0.5 rounded-full mt-2 font-medium ${c.badge}`}>
-                        {tpl.analises.length} análise{tpl.analises.length !== 1 ? 's' : ''}
-                      </span>
-                    </button>
-                  );
-                })}
+              
+              {carregandoTemplates ? (
+                <p className="text-sm text-gray-500 text-center py-6">Carregando templates...</p>
+              ) : templates.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-6">Nenhum template disponível</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                  {templates.map((tpl) => {
+                    const c = COR_MAP[tpl.cor] || COR_MAP.blue;
+                    const ativo = templateId === tpl.id;
+                    return (
+                      <button
+                        key={tpl.id}
+                        onClick={() => selecionarTemplate(tpl)}
+                        className={`text-left p-4 rounded-xl border-2 transition ${
+                          ativo ? `${c.card} ${c.btn} ring-2` : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
+                      >
+                        <p className="font-semibold text-sm text-gray-900">{tpl.nome}</p>
+                        <p className="text-xs text-gray-500 mt-1">{tpl.descricao}</p>
+                        <span className={`inline-block text-xs px-2 py-0.5 rounded-full mt-2 font-medium bg-gray-100 text-gray-700`}>
+                          ⚙️ Gerenciar
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {/* Botão para criar novo template */}
+              <div className="border-t border-gray-200 pt-4">
+                <p className="text-xs text-gray-600 mb-2">Não encontrou o template que precisa?</p>
+                <Link 
+                  href="/admin/templates" 
+                  className="inline-block text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold"
+                >
+                  + Criar Novo Template
+                </Link>
               </div>
             </div>
 
