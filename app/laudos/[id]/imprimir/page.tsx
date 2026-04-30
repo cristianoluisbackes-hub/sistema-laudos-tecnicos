@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/useAuth';
 import { getLaudo, getAnalises } from '@/lib/laudosServiceSupabase';
 import { avaliarStatus } from '@/lib/avaliarAnalise';
 
@@ -39,11 +40,15 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default function ImprimirLaudo() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+
   const [laudo, setLaudo] = useState<Laudo | null>(null);
   const [analises, setAnalises] = useState<Analise[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
     if (!id) return;
     (async () => {
       const [l, a] = await Promise.all([getLaudo(id), getAnalises(id)]);
@@ -51,7 +56,19 @@ export default function ImprimirLaudo() {
       setAnalises(a);
       setLoading(false);
     })();
-  }, [id]);
+  }, [id, user]);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // useAuth já redireciona
+  }
 
   useEffect(() => {
     if (!loading && laudo) {

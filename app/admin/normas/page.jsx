@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/lib/useAuth';
 import {
   listarNormas,
   criarNorma,
@@ -9,6 +10,8 @@ import {
 } from '@/lib/laudosServiceSupabase';
 
 export default function AdminNormas() {
+  const { user, loading } = useAuth();
+
   const [normas, setNormas] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
@@ -41,8 +44,22 @@ export default function AdminNormas() {
   }
 
   useEffect(() => {
-    carregarNormas();
-  }, []);
+    if (user) {
+      carregarNormas();
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // useAuth já redireciona
+  }
 
   // ────────────────────────────────────────
   // Criar norma

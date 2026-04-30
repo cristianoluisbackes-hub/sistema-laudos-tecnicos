@@ -221,6 +221,9 @@ export default function LaudoDetalhe() {
       await finalizarLaudo(laudo.id, null, statusGeral, idiomaSelecionado);
       await carregar();
       flash('Laudo finalizado.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro desconhecido';
+      alert(`Erro ao finalizar laudo: ${msg}`);
     } finally {
       setSalvando(false);
     }
@@ -229,16 +232,25 @@ export default function LaudoDetalhe() {
   // ── Render helpers ────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-400">Carregando...</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-300">
+        <div className="glass-card rounded-[2rem] border-slate-800/90 p-10 text-center shadow-[0_35px_120px_-80px_rgba(56,189,248,0.45)]">
+          <p className="text-2xl font-semibold text-white">Carregando laudo...</p>
+          <p className="mt-2 text-sm text-slate-400">Aguarde um momento enquanto recuperamos os dados.</p>
+        </div>
       </div>
     );
   }
 
   if (!laudo) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-600">Laudo não encontrado.</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-300">
+        <div className="glass-card rounded-[2rem] border-slate-800/90 p-10 text-center shadow-[0_35px_120px_-80px_rgba(56,189,248,0.45)]">
+          <p className="text-xl font-semibold text-white">Laudo não encontrado.</p>
+          <p className="mt-2 text-sm text-slate-400">Verifique se o link está correto ou retorne ao painel.</p>
+          <Link href="/" className="mt-5 inline-flex rounded-full button-primary px-5 py-3 text-sm font-semibold shadow-lg shadow-sky-500/20">
+            Voltar ao painel
+          </Link>
+        </div>
       </div>
     );
   }
@@ -257,22 +269,22 @@ export default function LaudoDetalhe() {
   const finalizado = laudo.status !== 'draft';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-sky-500/10 via-transparent to-transparent" />
+
       {/* Nav */}
-      <nav className="bg-white shadow-sm print:hidden">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm">
-            <Link href="/" className="text-blue-600 hover:underline">
-              Dashboard
-            </Link>
-            <span className="text-gray-400">/</span>
-            <span className="font-mono font-semibold text-gray-800">{laudo.numero}</span>
+      <nav className="relative mb-6 border-b border-slate-800/90 bg-slate-950/95 px-4 py-4 backdrop-blur-xl print:hidden">
+        <div className="max-w-5xl mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+            <Link href="/" className="text-sky-300 hover:text-sky-200">Dashboard</Link>
+            <span>/</span>
+            <span className="font-mono font-semibold text-white">{laudo.numero}</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-3">
             <Link
               href={`/laudos/${id}/imprimir`}
               target="_blank"
-              className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg"
+              className="rounded-full border border-slate-700/80 bg-slate-900/95 px-4 py-2 text-sm text-slate-200 transition hover:border-slate-500"
             >
               Imprimir / PDF
             </Link>
@@ -280,7 +292,7 @@ export default function LaudoDetalhe() {
               <button
                 onClick={handleFinalizar}
                 disabled={salvando}
-                className="text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-1.5 rounded-lg font-semibold"
+                className="rounded-full button-primary px-5 py-2 text-sm font-semibold shadow-lg shadow-sky-500/15 transition hover:brightness-110 disabled:opacity-60"
               >
                 Finalizar Laudo
               </button>
@@ -291,54 +303,62 @@ export default function LaudoDetalhe() {
 
       {/* Flash message */}
       {msg && (
-        <div className="max-w-5xl mx-auto px-4 pt-3">
-          <div className="bg-green-50 border-l-4 border-green-500 p-3 rounded text-sm text-green-800">
+        <div className="max-w-5xl mx-auto px-4 pb-2 md:px-6">
+          <div className="glass-card rounded-[1.75rem] border-emerald-500/20 p-4 text-sm text-emerald-100">
             {msg}
           </div>
         </div>
       )}
 
-      <main className="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
+      <main className="max-w-5xl mx-auto px-4 pb-12 md:px-6 space-y-6">
         {/* Header card */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-start justify-between flex-wrap gap-3">
+        <section className="glass-card rounded-[2rem] border-slate-800/90 p-6 shadow-[0_30px_120px_-70px_rgba(56,189,248,0.45)]">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wide">Número do Laudo</p>
-              <p className="text-2xl font-mono font-bold text-blue-600">{laudo.numero}</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs uppercase tracking-[0.35em] text-sky-400/75">Número do Laudo</p>
+              <h1 className="mt-3 text-4xl font-semibold text-white">{laudo.numero}</h1>
+              <p className="mt-2 text-sm text-slate-400">
                 Criado em {new Date(laudo.criado_em).toLocaleDateString('pt-BR')}
                 {laudo.finalizado_em &&
                   ` · Finalizado em ${new Date(laudo.finalizado_em).toLocaleDateString('pt-BR')}`}
-                {laudo.assinador_por && ` por ${laudo.assinador_por}`}
+                {laudo.assinador_por && ` · Assinado por ${laudo.assinador_por}`}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <span
-                className={`text-sm font-bold px-3 py-1 rounded-full ${STATUS_BADGE[statusGeral]}`}
+                className={`inline-flex rounded-full px-4 py-2 text-sm font-semibold ${
+                  statusGeral === 'approved'
+                    ? 'bg-emerald-500/15 text-emerald-300'
+                    : statusGeral === 'rejected'
+                    ? 'bg-rose-500/15 text-rose-300'
+                    : 'bg-slate-800/70 text-slate-200'
+                }`}
               >
                 {STATUS_LABEL[statusGeral]}
               </span>
               {!finalizado && !editandoInfo && (
                 <button
                   onClick={() => setEditandoInfo(true)}
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm font-semibold text-sky-300 transition hover:text-sky-200"
                 >
-                  Editar
+                  Editar informações
                 </button>
               )}
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Info section */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">
-            Informações do Produto
-          </h2>
+        <section className="glass-card rounded-[2rem] border-slate-800/90 p-6">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">
+              Informações do produto
+            </h2>
+          </div>
 
           {editandoInfo ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-6">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {(
                   [
                     ['cliente', 'Cliente'],
@@ -349,45 +369,45 @@ export default function LaudoDetalhe() {
                   ] as [keyof Laudo, string][]
                 ).map(([field, label]) => (
                   <label key={field} className="block">
-                    <span className="text-sm font-medium text-gray-700">{label}</span>
+                    <span className="text-sm font-medium text-slate-300">{label}</span>
                     <input
                       value={(infoForm[field] as string) ?? ''}
                       onChange={(e) => setInfoForm({ ...infoForm, [field]: e.target.value })}
-                      className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-dark mt-2 w-full rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                     />
                   </label>
                 ))}
               </div>
               <label className="block">
-                <span className="text-sm font-medium text-gray-700">Observações</span>
+                <span className="text-sm font-medium text-slate-300">Observações</span>
                 <textarea
                   value={(infoForm.observacoes as string) ?? ''}
                   onChange={(e) => setInfoForm({ ...infoForm, observacoes: e.target.value })}
-                  rows={3}
-                  className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                  className="input-dark mt-2 w-full rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                 />
               </label>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <button
                   onClick={handleSalvarInfo}
                   disabled={salvando}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm font-semibold px-5 py-2 rounded-lg"
+                  className="rounded-full button-primary px-5 py-3 text-sm font-semibold shadow-lg shadow-sky-500/20 disabled:opacity-60"
                 >
-                  {salvando ? 'Salvando...' : 'Salvar'}
+                  {salvando ? 'Salvando...' : 'Salvar alterações'}
                 </button>
                 <button
                   onClick={() => {
                     setInfoForm(laudo);
                     setEditandoInfo(false);
                   }}
-                  className="text-sm text-gray-500 hover:text-gray-700"
+                  className="rounded-full button-secondary px-5 py-3 text-sm font-semibold text-slate-300 hover:text-slate-100"
                 >
                   Cancelar
                 </button>
               </div>
             </div>
           ) : (
-            <dl className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            <dl className="grid gap-4 md:grid-cols-3 text-sm">
               {[
                 ['Cliente', laudo.cliente],
                 ['Artigo', laudo.artigo],
@@ -396,60 +416,58 @@ export default function LaudoDetalhe() {
                 ['Responsável', laudo.responsavel],
               ].map(([label, value]) => (
                 <div key={label}>
-                  <dt className="text-xs text-gray-400 uppercase tracking-wide">{label}</dt>
-                  <dd className="font-medium text-gray-900 mt-0.5">{value || '—'}</dd>
+                  <dt className="text-xs uppercase tracking-[0.25em] text-slate-500">{label}</dt>
+                  <dd className="mt-2 text-base font-semibold text-slate-100">{value || '—'}</dd>
                 </div>
               ))}
               {laudo.observacoes && (
-                <div className="col-span-2 md:col-span-3">
-                  <dt className="text-xs text-gray-400 uppercase tracking-wide">Observações</dt>
-                  <dd className="text-gray-700 mt-0.5">{laudo.observacoes}</dd>
+                <div className="md:col-span-3">
+                  <dt className="text-xs uppercase tracking-[0.25em] text-slate-500">Observações</dt>
+                  <dd className="mt-2 text-slate-300 whitespace-pre-line">{laudo.observacoes}</dd>
                 </div>
               )}
             </dl>
           )}
-        </div>
+        </section>
 
         {/* Analyses */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+        <section className="glass-card rounded-[2rem] border-slate-800/90 p-6">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">
               Análises ({analises.length})
             </h2>
             {!finalizado && (
               <button
                 onClick={() => setShowAddAnalise(!showAddAnalise)}
-                className="text-sm text-blue-600 hover:underline font-medium"
+                className="text-sm font-semibold text-sky-300 transition hover:text-sky-200"
               >
                 {showAddAnalise ? 'Cancelar' : '+ Adicionar análise'}
               </button>
             )}
           </div>
 
-          {/* Add analysis form */}
           {showAddAnalise && (
-            <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-              <p className="text-sm font-semibold text-blue-900 mb-3">Nova Análise</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="mb-6 rounded-[1.75rem] border border-slate-800/80 bg-slate-900/80 p-5">
+              <p className="mb-4 text-sm font-semibold text-slate-100">Nova análise</p>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <input
                   placeholder="Nome da análise *"
                   value={novaAnalise.nome}
                   onChange={(e) => setNovaAnalise({ ...novaAnalise, nome: e.target.value })}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                 />
                 <input
                   placeholder="Especificação (ex: >3.5)"
                   value={novaAnalise.specification}
-                  onChange={(e) =>
-                    setNovaAnalise({ ...novaAnalise, specification: e.target.value })
-                  }
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setNovaAnalise({ ...novaAnalise, specification: e.target.value })}
+                  className="input-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                 />
-                <input
-                  placeholder="Norma (ex: ISO 5470-2)"
+                <textarea
+                  placeholder="Norma — código e descrição"
                   value={novaAnalise.norma}
                   onChange={(e) => setNovaAnalise({ ...novaAnalise, norma: e.target.value })}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  className="col-span-full input-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                 />
                 <select
                   value={novaAnalise.tipo_foto}
@@ -459,29 +477,29 @@ export default function LaudoDetalhe() {
                       tipo_foto: e.target.value as 'required' | 'optional' | 'none',
                     })
                   }
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                 >
                   <option value="required">Foto obrigatória</option>
                   <option value="optional">Foto opcional</option>
                   <option value="none">Sem foto</option>
                 </select>
               </div>
-              <div className="flex gap-3 mt-3">
+              <div className="mt-5">
                 <button
                   onClick={handleAddAnalise}
                   disabled={adicionando || !novaAnalise.nome.trim()}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm font-semibold px-5 py-2 rounded-lg"
+                  className="rounded-full button-primary px-5 py-3 text-sm font-semibold shadow-lg shadow-sky-500/20 disabled:opacity-60"
                 >
-                  {adicionando ? 'Adicionando...' : 'Adicionar'}
+                  {adicionando ? 'Adicionando...' : 'Adicionar análise'}
                 </button>
               </div>
             </div>
           )}
 
           {analises.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">
-              Nenhuma análise ainda. Adicione a primeira acima.
-            </p>
+            <div className="rounded-[1.75rem] border border-slate-800/80 bg-slate-900/80 p-8 text-center text-slate-400">
+              Nenhuma análise disponível. Adicione a nova análise para começar.
+            </div>
           ) : (
             <div className="space-y-4">
               {analises.map((analise) => {
@@ -492,175 +510,112 @@ export default function LaudoDetalhe() {
                 return (
                   <div
                     key={analise.id}
-                    className={`border rounded-xl p-4 ${
+                    className={`rounded-[1.5rem] border p-4 ${
                       statusCalc === 'approved'
-                        ? 'border-green-200 bg-green-50'
+                        ? 'border-emerald-500/20 bg-emerald-500/10'
                         : statusCalc === 'rejected'
-                        ? 'border-red-200 bg-red-50'
-                        : 'border-gray-200 bg-white'
+                        ? 'border-rose-500/20 bg-rose-500/10'
+                        : 'border-slate-800/80 bg-slate-900/80'
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      {/* Left: name + meta */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-semibold text-gray-900 text-sm">{analise.nome}</p>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold text-slate-100">{analise.nome}</p>
                           {statusCalc && (
                             <span
-                              className={`text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_BADGE[statusCalc as keyof typeof STATUS_BADGE]}`}
+                              className={`rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                                statusCalc === 'approved'
+                                  ? 'bg-emerald-500/15 text-emerald-300'
+                                  : statusCalc === 'rejected'
+                                  ? 'bg-rose-500/15 text-rose-300'
+                                  : 'bg-slate-800/70 text-slate-300'
+                              }`}
                             >
                               {STATUS_LABEL[statusCalc as keyof typeof STATUS_LABEL]}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          Esp: <span className="font-mono font-semibold">{analise.specification || '—'}</span>
+                        <p className="mt-2 text-xs text-slate-400">
+                          Esp: <span className="font-mono text-slate-200">{analise.specification || '—'}</span>
                           {analise.norma && ` · ${analise.norma}`}
                           {' · '}
                           <span className={fotoInfo.cls}>{fotoInfo.label}</span>
                         </p>
                       </div>
 
-                      {/* Right: result input + delete */}
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-3">
                         {!finalizado ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-500">Resultado:</span>
+                          <div className="flex items-center gap-2 rounded-2xl border border-slate-800/80 bg-slate-950/90 px-3 py-2">
+                            <span className="text-xs text-slate-400">Resultado</span>
                             <input
                               type="text"
                               inputMode="decimal"
                               value={analise.resultado ?? ''}
                               onChange={(e) => handleResultadoChange(analise, e.target.value)}
                               placeholder="0.0"
-                              className="w-24 border border-gray-300 rounded-lg px-2 py-1 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-24 rounded-xl border border-slate-700 bg-slate-950 px-2 py-1 text-center text-sm font-mono text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                             />
                           </div>
                         ) : (
-                          <p className="text-sm font-mono font-semibold text-gray-800">
+                          <p className="text-sm font-mono font-semibold text-slate-100">
                             {analise.resultado || '—'}
                           </p>
                         )}
-
                         {!finalizado && (
                           <button
                             onClick={() => handleDeletarAnalise(analise.id)}
-                            className="text-red-400 hover:text-red-600 text-xs"
+                            className="text-xs font-semibold uppercase tracking-[0.16em] text-rose-300 transition hover:text-rose-200"
                           >
                             Remover
                           </button>
                         )}
                       </div>
                     </div>
-
-                    {/* Photo section — DESABILITADO TEMPORARIAMENTE */}
-                    {/* {analise.tipo_foto !== 'none' && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 flex items-center gap-4 flex-wrap">
-                        {analise.foto_url ? (
-                          <a
-                            href={analise.foto_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block"
-                          >
-                            <img
-                              src={analise.foto_url}
-                              alt="Foto da análise"
-                              className="h-20 w-28 object-cover rounded-lg border border-gray-200 hover:opacity-90 transition"
-                            />
-                          </a>
-                        ) : (
-                          <div className="h-20 w-28 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs text-center">
-                            Sem foto
-                          </div>
-                        )}
-
-                        {!finalizado && (
-                          <div>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              capture="environment"
-                              className="hidden"
-                              ref={(el) => {
-                                fileInputRefs.current[analise.id] = el;
-                              }}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleFotoChange(analise, file);
-                              }}
-                            />
-                            <button
-                              onClick={() => fileInputRefs.current[analise.id]?.click()}
-                              disabled={uploading[analise.id]}
-                              className="text-sm bg-white border border-gray-300 hover:border-blue-400 text-gray-700 px-3 py-1.5 rounded-lg disabled:opacity-50"
-                            >
-                              {uploading[analise.id]
-                                ? 'Enviando...'
-                                : analise.foto_url
-                                ? 'Trocar foto'
-                                : analise.tipo_foto === 'required'
-                                ? 'Adicionar foto *'
-                                : 'Adicionar foto'}
-                            </button>
-                            <p className={`text-xs mt-1 ${fotoInfo.cls}`}>
-                              {analise.tipo_foto === 'required' ? 'Necessária para finalizar' : 'Opcional'}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )} */}
                   </div>
                 );
               })}
             </div>
           )}
-        </div>
+        </section>
 
         {/* Result summary */}
         {analises.length > 0 && (
-          <>
-            {/* Seletor de Idioma */}
+          <section className="glass-card rounded-[2rem] border-slate-800/90 p-6">
             {!finalizado && (
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <label className="block text-sm font-semibold text-gray-800 mb-3">
-                  Idioma do Laudo
+              <div className="mb-6">
+                <label className="block text-sm font-semibold uppercase tracking-[0.3em] text-slate-400 mb-3">
+                  Idioma do laudo
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid gap-3 sm:grid-cols-4">
                   {IDIOMAS_DISPONIVEIS.map((idioma) => (
                     <button
                       key={idioma.codigo}
                       onClick={() => setIdiomaSelecionado(idioma.codigo)}
-                      className={`p-3 rounded-lg border-2 transition text-sm font-medium ${
+                      className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
                         idiomaSelecionado === idioma.codigo
-                          ? 'border-blue-600 bg-blue-50 text-blue-900'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                          ? 'bg-sky-500/15 text-sky-300 border border-sky-500/20'
+                          : 'bg-slate-900/90 text-slate-300 border border-slate-800/80 hover:bg-slate-900'
                       }`}
                     >
                       {idioma.label}
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  ℹ️ Selecione o idioma para o PDF do laudo
-                </p>
+                <p className="mt-3 text-xs text-slate-400">Selecione o idioma final para exportação do laudo.</p>
               </div>
             )}
 
-            {/* Resultado Final */}
             <div
-              className={`rounded-xl p-6 text-center ${
+              className={`rounded-[1.75rem] p-6 text-center ${
                 statusGeral === 'approved'
-                  ? 'bg-green-600'
+                  ? 'bg-emerald-600'
                   : statusGeral === 'rejected'
-                  ? 'bg-red-600'
-                  : 'bg-gray-200'
+                  ? 'bg-rose-600'
+                  : 'bg-slate-700'
               }`}
             >
-              <p
-                className={`text-3xl font-bold ${
-                  statusGeral === 'draft' ? 'text-gray-600' : 'text-white'
-                }`}
-              >
+              <p className="text-3xl font-bold text-white">
                 {statusGeral === 'approved'
                   ? '✅ LAUDO APROVADO'
                   : statusGeral === 'rejected'
@@ -671,13 +626,13 @@ export default function LaudoDetalhe() {
                 <button
                   onClick={handleFinalizar}
                   disabled={salvando}
-                  className="mt-4 bg-white text-gray-900 font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                  className="mt-5 rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-slate-900/20 disabled:opacity-60"
                 >
-                  {salvando ? 'Finalizando...' : 'Finalizar e Registrar'}
+                  {salvando ? 'Finalizando...' : 'Finalizar e registrar'}
                 </button>
               )}
             </div>
-          </>
+          </section>
         )}
       </main>
     </div>

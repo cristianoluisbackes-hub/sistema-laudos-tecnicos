@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/lib/useAuth';
 import { criarLaudo, adicionarAnalise, listarTemplates, obterTemplate } from '@/lib/laudosServiceSupabase';
 
 const BLANK_ANALISE = { nome: '', norma: '', specification: '', tipo_foto: 'optional' };
@@ -14,13 +15,14 @@ const TIPO_FOTO_LABEL = {
 };
 
 const COR_MAP = {
-  blue: { card: 'border-blue-400 bg-blue-50', badge: 'bg-blue-100 text-blue-800', btn: 'ring-blue-500' },
-  green: { card: 'border-green-400 bg-green-50', badge: 'bg-green-100 text-green-800', btn: 'ring-green-500' },
-  gray: { card: 'border-gray-300 bg-gray-50', badge: 'bg-gray-100 text-gray-700', btn: 'ring-gray-400' },
+  blue: { card: 'border-sky-400/20 bg-sky-500/10', badge: 'bg-sky-500/15 text-sky-300', btn: 'ring-sky-500/50' },
+  green: { card: 'border-emerald-400/20 bg-emerald-500/10', badge: 'bg-emerald-500/15 text-emerald-300', btn: 'ring-emerald-500/50' },
+  gray: { card: 'border-slate-400/20 bg-slate-500/10', badge: 'bg-slate-500/15 text-slate-300', btn: 'ring-slate-500/50' },
 };
 
 export default function NovoLaudo() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [passo, setPasso] = useState(1);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
@@ -52,8 +54,22 @@ export default function NovoLaudo() {
       }
     }
 
-    carregarTemplates();
-  }, []);
+    if (user) {
+      carregarTemplates();
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // useAuth já redireciona
+  }
 
   // ── Passo 1 ──────────────────────────────────────────────────
   function handleInfoChange(field, value) {
@@ -72,11 +88,11 @@ export default function NovoLaudo() {
   // ── Passo 2 — templates ──────────────────────────────────────
   async function selecionarTemplate(tpl) {
     setTemplateId(tpl.id);
-    
+
     // Obter template completo com análises do banco
     try {
       const templateCompleto = await obterTemplate(tpl.id);
-      
+
       // Mapear análises do banco para o formato esperado
       const analisesFormatadas = templateCompleto.analises.map((a) => ({
         id: a.id,
@@ -85,7 +101,7 @@ export default function NovoLaudo() {
         specification: a.specification || '',
         tipo_foto: a.tipo_foto || 'optional',
       }));
-      
+
       setAnalises(analisesFormatadas);
     } catch (err) {
       setErro(err.message || 'Erro ao carregar template');
@@ -142,105 +158,138 @@ export default function NovoLaudo() {
 
   // ── Render ───────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-2 text-sm">
-          <Link href="/" className="text-blue-600 hover:underline">Dashboard</Link>
-          <span className="text-gray-400">/</span>
-          <span className="text-gray-700 font-medium">Novo Laudo</span>
+    <div className="min-h-screen bg-slate-950">
+      <nav className="glass-card border-slate-800/90 rounded-none">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-3 text-sm">
+          <Link href="/" className="text-sky-300 hover:text-sky-200 transition">Dashboard</Link>
+          <span className="text-slate-600">/</span>
+          <span className="text-slate-300 font-medium">Novo laudo</span>
         </div>
       </nav>
 
-      <main className="max-w-3xl mx-auto p-4 md:p-6">
+      <main className="max-w-4xl mx-auto p-6">
         {/* Steps indicator */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center justify-center gap-6 mb-8">
           {[
-            { n: 1, label: 'Dados do Produto' },
-            { n: 2, label: 'Template e Análises' },
+            { n: 1, label: 'Dados do produto' },
+            { n: 2, label: 'Template e análises' },
           ].map(({ n, label }) => (
-            <div key={n} className="flex items-center gap-2">
+            <div key={n} className="flex items-center gap-4">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${
-                  passo >= n ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                  passo >= n
+                    ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20'
+                    : 'bg-slate-800 text-slate-500 border border-slate-700'
                 }`}
               >
                 {n}
               </div>
-              <span className={`text-sm hidden sm:block ${passo >= n ? 'text-gray-800 font-medium' : 'text-gray-400'}`}>
+              <span className={`text-sm font-medium transition ${
+                passo >= n ? 'text-slate-200' : 'text-slate-500'
+              }`}>
                 {label}
               </span>
-              {n < 2 && <span className="text-gray-300 mx-1">›</span>}
+              {n < 2 && (
+                <div className={`w-8 h-0.5 transition ${
+                  passo > n ? 'bg-sky-500' : 'bg-slate-700'
+                }`} />
+              )}
             </div>
           ))}
         </div>
 
         {erro && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded mb-4 text-sm text-red-700">
-            {erro}
+          <div className="glass-card rounded-[1.75rem] border-rose-500/20 bg-rose-500/10 p-4 mb-6 text-sm text-rose-300">
+            <div className="flex items-center gap-2">
+              <span className="text-rose-400">⚠️</span>
+              {erro}
+            </div>
           </div>
         )}
 
         {/* ── PASSO 1 ── */}
         {passo === 1 && (
-          <div className="bg-white rounded-xl shadow-sm p-6 space-y-5">
-            <h2 className="font-semibold text-gray-800">Dados do Produto</h2>
+          <section className="glass-card rounded-[2rem] border-slate-800/90 p-8 space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-bold text-slate-100 mb-2">Dados do produto</h2>
+              <p className="text-slate-400 text-sm">Preencha as informações básicas do laudo técnico</p>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
-                { field: 'cliente',     label: 'Cliente *',     req: true  },
-                { field: 'artigo',      label: 'Artigo *',      req: true  },
-                { field: 'cor',         label: 'Cor',           req: false },
-                { field: 'op',          label: 'OP',            req: false },
-                { field: 'responsavel', label: 'Responsável',   req: false },
-              ].map(({ field, label }) => (
+                { field: 'cliente',     label: 'Cliente',     req: true,  icon: '🏢' },
+                { field: 'artigo',      label: 'Artigo',      req: true,  icon: '📦' },
+                { field: 'cor',         label: 'Cor',         req: false, icon: '🎨' },
+                { field: 'op',          label: 'OP',          req: false, icon: '🔢' },
+                { field: 'responsavel', label: 'Responsável', req: false, icon: '👤' },
+              ].map(({ field, label, req, icon }) => (
                 <label key={field} className="block">
-                  <span className="text-sm font-medium text-gray-700">{label}</span>
+                  <span className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                    <span>{icon}</span>
+                    {label} {req && <span className="text-rose-400">*</span>}
+                  </span>
                   <input
                     value={info[field]}
                     onChange={(e) => handleInfoChange(field, e.target.value)}
-                    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="input-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70 w-full"
+                    placeholder={`Digite ${label.toLowerCase()}`}
                   />
                 </label>
               ))}
             </div>
 
             <label className="block">
-              <span className="text-sm font-medium text-gray-700">Observações</span>
+              <span className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                <span>📝</span>
+                Observações
+              </span>
               <textarea
                 value={info.observacoes}
                 onChange={(e) => handleInfoChange('observacoes', e.target.value)}
-                rows={2}
-                className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={4}
+                className="input-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70 w-full resize-none"
+                placeholder="Observações adicionais sobre o produto..."
               />
             </label>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-4 pt-4 border-t border-slate-800/50">
               <button
                 onClick={avancar}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-6 py-2 rounded-lg"
+                className="button-primary px-8 py-3 text-sm font-semibold shadow-lg shadow-sky-500/20 flex-1 md:flex-none"
               >
                 Próximo →
               </button>
-              <Link href="/" className="text-sm text-gray-500 hover:text-gray-700 self-center">
+              <Link href="/" className="button-secondary px-6 py-3 text-sm font-semibold">
                 Cancelar
               </Link>
             </div>
-          </div>
+          </section>
         )}
 
         {/* ── PASSO 2 ── */}
         {passo === 2 && (
-          <div className="space-y-5">
+          <div className="space-y-6">
             {/* Template selector */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="font-semibold text-gray-800 mb-4">Selecione o Template</h2>
-              
+            <section className="glass-card rounded-[2rem] border-slate-800/90 p-8">
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-bold text-slate-100 mb-2">Selecione o template</h2>
+                <p className="text-slate-400 text-sm">Escolha um template de análises para o laudo</p>
+              </div>
+
               {carregandoTemplates ? (
-                <p className="text-sm text-gray-500 text-center py-6">Carregando templates...</p>
+                <div className="text-center py-12">
+                  <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-slate-400 text-sm">Carregando templates...</p>
+                </div>
               ) : templates.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-6">Nenhum template disponível</p>
+                <div className="text-center py-12 rounded-[1.75rem] border border-slate-800/80 bg-slate-900/80">
+                  <p className="text-slate-400 text-sm mb-4">Nenhum template disponível</p>
+                  <Link href="/admin/templates" className="button-primary px-6 py-2 text-sm">
+                    Criar primeiro template
+                  </Link>
+                </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   {templates.map((tpl) => {
                     const c = COR_MAP[tpl.cor] || COR_MAP.blue;
                     const ativo = templateId === tpl.id;
@@ -248,93 +297,106 @@ export default function NovoLaudo() {
                       <button
                         key={tpl.id}
                         onClick={() => selecionarTemplate(tpl)}
-                        className={`text-left p-4 rounded-xl border-2 transition ${
-                          ativo ? `${c.card} ${c.btn} ring-2` : 'border-gray-200 hover:border-gray-300 bg-white'
+                        className={`text-left p-6 rounded-[1.5rem] border-2 transition-all duration-200 ${
+                          ativo
+                            ? `${c.card} ${c.btn} ring-2 shadow-lg`
+                            : 'border-slate-800/80 bg-slate-900/80 hover:border-slate-700 hover:bg-slate-800/50'
                         }`}
                       >
-                        <p className="font-semibold text-sm text-gray-900">{tpl.nome}</p>
-                        <p className="text-xs text-gray-500 mt-1">{tpl.descricao}</p>
-                        <span className={`inline-block text-xs px-2 py-0.5 rounded-full mt-2 font-medium bg-gray-100 text-gray-700`}>
-                          ⚙️ Gerenciar
+                        <p className="font-semibold text-sm text-slate-100 mb-2">{tpl.nome}</p>
+                        <p className="text-xs text-slate-400 mb-3">{tpl.descricao}</p>
+                        <span className={`inline-block text-xs px-3 py-1 rounded-full font-medium ${c.badge}`}>
+                          {tpl.analises?.length || 0} análises
                         </span>
                       </button>
                     );
                   })}
                 </div>
               )}
-              
+
               {/* Botão para criar novo template */}
-              <div className="border-t border-gray-200 pt-4">
-                <p className="text-xs text-gray-600 mb-2">Não encontrou o template que precisa?</p>
-                <Link 
-                  href="/admin/templates" 
-                  className="inline-block text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold"
+              <div className="border-t border-slate-800/50 pt-6">
+                <p className="text-xs text-slate-400 mb-3">Não encontrou o template ideal?</p>
+                <Link
+                  href="/admin/templates"
+                  className="inline-flex items-center gap-2 button-primary px-6 py-3 text-sm font-semibold shadow-lg shadow-emerald-500/20"
                 >
-                  + Criar Novo Template
+                  <span>+</span>
+                  Criar novo template
                 </Link>
               </div>
-            </div>
+            </section>
 
             {/* Analyses list */}
             {templateId && (
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-semibold text-gray-800">
-                    Análises ({analises.length})
-                  </h2>
+              <section className="glass-card rounded-[2rem] border-slate-800/90 p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-100">
+                      Análises ({analises.length})
+                    </h2>
+                    <p className="text-slate-400 text-sm">Configure as análises do laudo</p>
+                  </div>
                   {!adicionando && (
                     <button
                       onClick={() => setAdicionando(true)}
-                      className="text-sm text-blue-600 hover:underline font-medium"
+                      className="text-sm font-semibold text-sky-300 hover:text-sky-200 transition flex items-center gap-2"
                     >
-                      + Adicionar
+                      <span>+</span>
+                      Adicionar análise
                     </button>
                   )}
                 </div>
 
                 {analises.length === 0 && !adicionando && (
-                  <p className="text-sm text-gray-400 text-center py-6">
-                    Nenhuma análise. Clique em "+ Adicionar" para incluir.
-                  </p>
+                  <div className="text-center py-12 rounded-[1.75rem] border border-slate-800/80 bg-slate-900/80">
+                    <p className="text-slate-400 text-sm mb-4">Nenhuma análise configurada</p>
+                    <button
+                      onClick={() => setAdicionando(true)}
+                      className="button-primary px-6 py-2 text-sm"
+                    >
+                      Adicionar primeira análise
+                    </button>
+                  </div>
                 )}
 
                 {/* Analysis rows */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {analises.map((a, idx) => (
                     <div
                       key={idx}
-                      className="grid grid-cols-12 gap-2 items-center p-3 bg-gray-50 rounded-lg"
+                      className="grid grid-cols-12 gap-3 items-center p-4 rounded-[1.25rem] border border-slate-800/80 bg-slate-900/80"
                     >
                       <input
                         value={a.nome}
                         onChange={(e) => handleAnaliseChange(idx, 'nome', e.target.value)}
-                        placeholder="Nome *"
-                        className="col-span-3 border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="Nome da análise *"
+                        className="col-span-3 input-dark rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                       />
                       <input
                         value={a.norma}
                         onChange={(e) => handleAnaliseChange(idx, 'norma', e.target.value)}
-                        placeholder="Norma"
-                        className="col-span-3 border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="Norma (ex: ISO 5470-2)"
+                        className="col-span-3 input-dark rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                       />
                       <input
                         value={a.specification}
                         onChange={(e) => handleAnaliseChange(idx, 'specification', e.target.value)}
                         placeholder="Spec. (ex: >3.5)"
-                        className="col-span-3 border border-gray-300 rounded px-2 py-1.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="col-span-3 input-dark rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                       />
                       <select
                         value={a.tipo_foto}
                         onChange={(e) => handleAnaliseChange(idx, 'tipo_foto', e.target.value)}
-                        className="col-span-2 border border-gray-300 rounded px-1 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="col-span-2 input-dark rounded-xl px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                       >
-                        <option value="required">Foto obrig.</option>
+                        <option value="required">Obrigatória</option>
                         <option value="optional">Opcional</option>
                         <option value="none">Sem foto</option>
                       </select>
                       <button
                         onClick={() => removerAnalise(idx)}
-                        className="col-span-1 text-red-400 hover:text-red-600 text-xs text-center"
+                        className="col-span-1 text-rose-400 hover:text-rose-300 text-xs font-semibold transition p-2 rounded-lg hover:bg-rose-500/10"
                       >
                         ✕
                       </button>
@@ -344,71 +406,74 @@ export default function NovoLaudo() {
 
                 {/* Add new analysis form */}
                 {adicionando && (
-                  <div className="mt-3 p-3 border border-blue-200 bg-blue-50 rounded-lg">
-                    <p className="text-xs font-semibold text-blue-800 mb-2">Nova análise</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="mt-6 p-6 rounded-[1.75rem] border border-sky-500/20 bg-sky-500/10">
+                    <p className="text-sm font-semibold text-sky-300 mb-4 flex items-center gap-2">
+                      <span>🧪</span>
+                      Nova análise
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <input
                         autoFocus
                         value={novaAnalise.nome}
                         onChange={(e) => setNovaAnalise({ ...novaAnalise, nome: e.target.value })}
-                        placeholder="Nome *"
-                        className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="Nome da análise *"
+                        className="input-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                       />
                       <input
                         value={novaAnalise.norma}
                         onChange={(e) => setNovaAnalise({ ...novaAnalise, norma: e.target.value })}
                         placeholder="Norma (ex: ISO 5470-2)"
-                        className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="input-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                       />
                       <input
                         value={novaAnalise.specification}
                         onChange={(e) => setNovaAnalise({ ...novaAnalise, specification: e.target.value })}
                         placeholder="Especificação (ex: >3.5)"
-                        className="border border-gray-300 rounded px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="input-dark rounded-2xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                       />
                       <select
                         value={novaAnalise.tipo_foto}
                         onChange={(e) => setNovaAnalise({ ...novaAnalise, tipo_foto: e.target.value })}
-                        className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="input-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                       >
                         <option value="required">Foto obrigatória</option>
                         <option value="optional">Foto opcional</option>
                         <option value="none">Sem foto</option>
                       </select>
                     </div>
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-3 mt-6">
                       <button
                         onClick={adicionarLinha}
                         disabled={!novaAnalise.nome.trim()}
-                        className="text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-1.5 rounded-lg font-semibold"
+                        className="button-primary px-6 py-3 text-sm font-semibold shadow-lg shadow-sky-500/20"
                       >
-                        Adicionar
+                        Adicionar análise
                       </button>
                       <button
                         onClick={() => { setAdicionando(false); setNovaAnalise(BLANK_ANALISE); }}
-                        className="text-sm text-gray-500 hover:text-gray-700"
+                        className="button-secondary px-6 py-3 text-sm font-semibold"
                       >
                         Cancelar
                       </button>
                     </div>
                   </div>
                 )}
-              </div>
+              </section>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex gap-4 pt-4">
               <button
                 onClick={() => setPasso(1)}
-                className="text-sm text-gray-500 hover:text-gray-700 px-4 py-2 border border-gray-300 rounded-lg"
+                className="button-secondary px-8 py-3 text-sm font-semibold flex-1 md:flex-none"
               >
                 ← Voltar
               </button>
               <button
                 onClick={handleCriar}
                 disabled={salvando || !templateId}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm font-semibold px-8 py-2 rounded-lg"
+                className="button-primary px-8 py-3 text-sm font-semibold shadow-lg shadow-sky-500/20 flex-1 md:flex-none disabled:opacity-60"
               >
-                {salvando ? 'Criando...' : 'Criar Laudo'}
+                {salvando ? 'Criando laudo...' : 'Criar laudo'}
               </button>
             </div>
           </div>

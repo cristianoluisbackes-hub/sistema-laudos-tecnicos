@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/useAuth';
 import {
   listarTemplates,
   criarTemplate,
@@ -18,6 +19,8 @@ const COR_MAP = {
 
 export default function AdminTemplates() {
   const router = useRouter();
+  const { user, loading } = useAuth();
+
   const [templates, setTemplates] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
@@ -53,8 +56,22 @@ export default function AdminTemplates() {
   }
 
   useEffect(() => {
-    carregarTemplates();
-  }, []);
+    if (user) {
+      carregarTemplates();
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // useAuth já redireciona
+  }
 
   // ────────────────────────────────────────
   // Criar novo template
