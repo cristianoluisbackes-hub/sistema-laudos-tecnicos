@@ -65,12 +65,7 @@ export default function Home() {
         obterEstatisticas(),
         meuHistoricoLaudos(filtros),
       ]);
-      setStats({
-        total: statsData.total,
-        aprovados: statsData.aprovados,
-        reprovados: statsData.reprovados,
-        taxa: statsData.taxa,
-      });
+      setStats(statsData);
       setLaudos(laudosData);
     } finally {
       setLoadingLaudos(false);
