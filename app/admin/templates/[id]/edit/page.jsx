@@ -380,18 +380,21 @@ export default function EditTemplate() {
                     </label>
                     <select
                       value={analiseForm.norma_id || ''}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const normaId = e.target.value || null;
+                        const norma = normas.find((n) => n.id === normaId);
                         setAnaliseForm({
                           ...analiseForm,
-                          norma_id: e.target.value || null,
-                        })
-                      }
+                          norma_id: normaId,
+                          specification: norma?.specification ?? analiseForm.specification,
+                        });
+                      }}
                       className="input-dark w-full rounded-xl px-4 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                     >
                       <option value="">Sem norma</option>
                       {normas.map((n) => (
                         <option key={n.id} value={n.id}>
-                          {n.codigo} - {n.descricao}
+                          {n.codigo}{n.descricao ? ` — ${n.descricao}` : ''}
                         </option>
                       ))}
                     </select>
@@ -412,7 +415,7 @@ export default function EditTemplate() {
                           specification: e.target.value,
                         })
                       }
-                      className="input-dark w-full rounded-xl px-4 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
+                      className="input-dark w-full rounded-xl px-4 py-2 text-sm font-mono placeholder:font-sans placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                     />
                   </div>
                 </div>
