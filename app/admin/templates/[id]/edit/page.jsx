@@ -439,6 +439,7 @@ export default function EditTemplate() {
                         setAnaliseForm({
                           ...analiseForm,
                           norma_id: normaId,
+                          nome: norma ? (norma.descricao || norma.codigo) : analiseForm.nome,
                           specification: norma?.specification ?? analiseForm.specification,
                         });
                       }}
