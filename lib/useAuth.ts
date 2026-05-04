@@ -11,6 +11,13 @@ export function useAuth(requireAuth = true) {
   useEffect(() => {
     let mounted = true;
 
+    const safetyTimer = setTimeout(() => {
+      if (mounted) {
+        setLoading(false);
+        if (requireAuth) router.replace('/');
+      }
+    }, 6000);
+
     const checkAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -34,6 +41,7 @@ export function useAuth(requireAuth = true) {
         console.error('Erro inesperado na autenticação:', error);
         if (requireAuth) router.replace('/');
       } finally {
+        clearTimeout(safetyTimer);
         if (mounted) setLoading(false);
       }
     };
@@ -55,6 +63,7 @@ export function useAuth(requireAuth = true) {
 
     return () => {
       mounted = false;
+      clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
   }, [router, requireAuth]);
