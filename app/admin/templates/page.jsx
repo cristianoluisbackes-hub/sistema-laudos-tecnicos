@@ -144,12 +144,25 @@ export default function AdminTemplates() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-sky-500/10 via-transparent to-transparent" />
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
         {/* ──── Header ──── */}
-        <div className="mb-8">
-          <p className="text-xs uppercase tracking-[0.3em] text-sky-400/70">Administração</p>
-          <h1 className="text-4xl font-bold tracking-tight text-white flex items-center gap-3">
-            📋 Gerenciar bases de análises
-          </h1>
-          <p className="text-slate-400 mt-2">Crie, edite e organize suas bases de análises</p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-sky-400/70">Administração</p>
+            <h1 className="text-4xl font-bold tracking-tight text-white flex items-center gap-3">
+              📋 Gerenciar bases de análises
+            </h1>
+            <p className="text-slate-400 mt-2">Crie, edite e organize suas bases de análises</p>
+          </div>
+          <div className="flex gap-3 text-sm shrink-0">
+            <Link href="/admin/analises" className="text-slate-400 hover:text-slate-200 transition px-3 py-2">
+              Catálogo de análises
+            </Link>
+            <Link href="/admin/normas" className="text-slate-400 hover:text-slate-200 transition px-3 py-2">
+              Normas
+            </Link>
+            <Link href="/" className="text-slate-400 hover:text-slate-200 transition px-3 py-2">
+              ← Dashboard
+            </Link>
+          </div>
         </div>
 
         {/* ──── Erro ──── */}
