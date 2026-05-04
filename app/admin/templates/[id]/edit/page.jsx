@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import {
   obterTemplate,
   listarNormas,
+  listarCatalogoAnalises,
   atualizarTemplate,
   adicionarAnaliseTemplate,
   atualizarAnaliseTemplate,
@@ -43,6 +44,12 @@ export default function EditTemplate() {
   // Análises
   const [analises, setAnalises] = useState([]);
   const [normas, setNormas] = useState([]);
+  const [catalogo, setCatalogo] = useState([]);
+
+  // Modal catálogo
+  const [mostraCatalogo, setMostraCatalogo] = useState(false);
+  const [selecionados, setSelecionados] = useState([]);
+  const [filtroCatalogo, setFiltroCatalogo] = useState('');
 
   // Edição/Criação de análise
   const [editandoAnaliseId, setEditandoAnaliseId] = useState(null);
@@ -64,9 +71,10 @@ export default function EditTemplate() {
     setCarregando(true);
     setErro('');
     try {
-      const [template, normasData] = await Promise.all([
+      const [template, normasData, catalogoData] = await Promise.all([
         obterTemplate(templateId),
         listarNormas(),
+        listarCatalogoAnalises(),
       ]);
 
       setNome(template.nome);
@@ -74,6 +82,7 @@ export default function EditTemplate() {
       setCor(template.cor);
       setAnalises(template.analises || []);
       setNormas(normasData);
+      setCatalogo(catalogoData);
     } catch (err) {
       setErro(err.message || 'Erro ao carregar base de análises');
     } finally {
@@ -156,6 +165,47 @@ export default function EditTemplate() {
       setSalvando(false);
     }
   }
+
+  // ────────────────────────────────────────
+  // Adicionar do catálogo
+  // ────────────────────────────────────────
+  async function handleAdicionarDoCatalogo() {
+    if (selecionados.length === 0) return;
+    setSalvando(true);
+    setErro('');
+    try {
+      for (const item of selecionados) {
+        await adicionarAnaliseTemplate(
+          templateId,
+          item.nome,
+          item.norma?.id || null,
+          item.specification || '',
+          item.tipo_foto || 'optional'
+        );
+      }
+      setMostraCatalogo(false);
+      setSelecionados([]);
+      setFiltroCatalogo('');
+      const template = await obterTemplate(templateId);
+      setAnalises(template.analises || []);
+    } catch (err) {
+      setErro(err.message || 'Erro ao adicionar análises');
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  function toggleSelecionado(item) {
+    setSelecionados((prev) =>
+      prev.find((s) => s.id === item.id)
+        ? prev.filter((s) => s.id !== item.id)
+        : [...prev, item]
+    );
+  }
+
+  const catalogoFiltrado = catalogo.filter((a) =>
+    !filtroCatalogo || a.nome.toLowerCase().includes(filtroCatalogo.toLowerCase())
+  );
 
   // ────────────────────────────────────────
   // Deletar análise
@@ -330,21 +380,24 @@ export default function EditTemplate() {
               Análises ({analises.length})
             </h2>
             {!mostraFormAnalise && (
-              <button
-                onClick={() => {
-                  setAnaliseForm({
-                    nome: '',
-                    norma_id: null,
-                    specification: '',
-                    tipo_foto: 'optional',
-                  });
-                  setEditandoAnaliseId(null);
-                  setMostraFormAnalise(true);
-                }}
-                className="button-primary px-4 py-2 rounded-xl font-semibold"
-              >
-                + Adicionar Análise
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setMostraCatalogo(true); setSelecionados([]); setFiltroCatalogo(''); }}
+                  className="button-secondary px-4 py-2 rounded-xl font-semibold text-sm"
+                >
+                  📋 Do catálogo
+                </button>
+                <button
+                  onClick={() => {
+                    setAnaliseForm({ nome: '', norma_id: null, specification: '', tipo_foto: 'optional' });
+                    setEditandoAnaliseId(null);
+                    setMostraFormAnalise(true);
+                  }}
+                  className="button-primary px-4 py-2 rounded-xl font-semibold text-sm"
+                >
+                  + Manual
+                </button>
+              </div>
             )}
           </div>
 
@@ -544,6 +597,90 @@ export default function EditTemplate() {
           )}
         </div>
       </div>
+
+      {/* ──── Modal Catálogo ──── */}
+      {mostraCatalogo && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-card rounded-[2rem] border-slate-800/90 w-full max-w-2xl flex flex-col max-h-[80vh]">
+            <div className="p-6 border-b border-slate-800/60">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-slate-100">Selecionar do catálogo</h3>
+                <button onClick={() => setMostraCatalogo(false)} className="text-slate-400 hover:text-slate-200 text-xl">✕</button>
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar análise..."
+                value={filtroCatalogo}
+                onChange={(e) => setFiltroCatalogo(e.target.value)}
+                className="input-dark w-full rounded-2xl px-4 py-2.5 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
+              />
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {catalogoFiltrado.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-slate-400 text-sm">Nenhuma análise no catálogo.</p>
+                  <a href="/admin/analises" target="_blank" className="text-sky-400 text-sm hover:underline mt-1 inline-block">
+                    Ir para o catálogo →
+                  </a>
+                </div>
+              ) : (
+                catalogoFiltrado.map((item) => {
+                  const sel = selecionados.find((s) => s.id === item.id);
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => toggleSelecionado(item)}
+                      className={`w-full text-left p-4 rounded-2xl border transition ${
+                        sel
+                          ? 'border-sky-500/50 bg-sky-500/10'
+                          : 'border-slate-800/60 bg-slate-900/40 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                          sel ? 'border-sky-500 bg-sky-500' : 'border-slate-600'
+                        }`}>
+                          {sel && <span className="text-white text-xs">✓</span>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-slate-100 text-sm">{item.nome}</p>
+                          <div className="flex gap-3 mt-0.5 text-xs text-slate-400">
+                            {item.norma && <span>📚 {item.norma.codigo}</span>}
+                            {item.specification && <span className="font-mono text-sky-400/80">Spec: {item.specification}</span>}
+                            <span>{TIPO_FOTO_LABEL[item.tipo_foto]}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="p-4 border-t border-slate-800/60 flex items-center justify-between gap-3">
+              <span className="text-sm text-slate-400">
+                {selecionados.length} selecionada{selecionados.length !== 1 ? 's' : ''}
+              </span>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setMostraCatalogo(false)}
+                  className="button-secondary px-4 py-2 rounded-xl font-semibold text-sm"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAdicionarDoCatalogo}
+                  disabled={selecionados.length === 0 || salvando}
+                  className="button-primary px-5 py-2 rounded-xl font-semibold text-sm disabled:opacity-50"
+                >
+                  {salvando ? 'Adicionando...' : `Adicionar ${selecionados.length > 0 ? `(${selecionados.length})` : ''}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ──── Modal Confirmar Delete ──── */}
       {confirmandoDeleteAnalise && (
