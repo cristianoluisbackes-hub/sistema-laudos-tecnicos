@@ -12,10 +12,7 @@ export function useAuth(requireAuth = true) {
     let mounted = true;
 
     const safetyTimer = setTimeout(() => {
-      if (mounted) {
-        setLoading(false);
-        if (requireAuth) router.replace('/');
-      }
+      if (mounted) setLoading(false);
     }, 6000);
 
     const checkAuth = async () => {
