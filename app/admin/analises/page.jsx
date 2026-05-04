@@ -101,6 +101,7 @@ export default function AdminAnalises() {
     setForm((f) => ({
       ...f,
       norma_id: normaId,
+      nome: norma ? (norma.descricao || norma.codigo) : f.nome,
       specification: norma?.specification ?? f.specification,
     }));
   }
@@ -271,13 +272,14 @@ export default function AdminAnalises() {
                     onChange={(e) => handleNormaChange(e.target.value)}
                     className="input-dark w-full rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                   >
-                    <option value="">Sem norma</option>
+                    <option value="">Selecione a norma...</option>
                     {normas.map((n) => (
                       <option key={n.id} value={n.id}>
                         {n.codigo}{n.descricao ? ` — ${n.descricao}` : ''}
                       </option>
                     ))}
                   </select>
+                  <p className="text-xs text-slate-500 mt-1.5">Nome e specification preenchidos automaticamente.</p>
                 </div>
 
                 <div>
