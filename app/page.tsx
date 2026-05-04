@@ -49,6 +49,11 @@ export default function Home() {
   useEffect(() => {
     let mounted = true;
 
+    // Garante que o loading nunca fica travado — libera após 6s no máximo
+    const safetyTimer = setTimeout(() => {
+      if (mounted) setLoading(false);
+    }, 6000);
+
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -59,6 +64,7 @@ export default function Home() {
       } catch (error) {
         console.error('Erro ao obter sessão Supabase:', error);
       } finally {
+        clearTimeout(safetyTimer);
         if (mounted) setLoading(false);
       }
     };
@@ -81,6 +87,7 @@ export default function Home() {
 
     return () => {
       mounted = false;
+      clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
   }, []);
