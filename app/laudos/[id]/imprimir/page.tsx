@@ -72,7 +72,14 @@ export default function ImprimirLaudo() {
 
   useEffect(() => {
     if (!loading && laudo) {
-      setTimeout(() => window.print(), 600);
+      const timer = window.setTimeout(() => {
+        try {
+          window.print();
+        } catch (error) {
+          console.error('Falha ao abrir impressão automática:', error);
+        }
+      }, 600);
+      return () => window.clearTimeout(timer);
     }
   }, [loading, laudo]);
 
@@ -119,6 +126,9 @@ export default function ImprimirLaudo() {
       </div>
 
       <div className="max-w-4xl mx-auto p-8 text-gray-900" style={{ fontSize: '12px' }}>
+        <div className="no-print mb-6 rounded-2xl border border-blue-200 bg-blue-50/90 p-4 text-sm text-blue-900">
+          Se o diálogo de impressão não abrir automaticamente, clique no botão “Imprimir / Salvar PDF”.
+        </div>
         {/* Header */}
         <div className="border-b-2 border-blue-600 pb-4 mb-6 flex items-start justify-between">
           <div>

@@ -13,9 +13,9 @@ import {
 } from '@/lib/laudosServiceSupabase';
 
 const COR_MAP = {
-  blue: { bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-700' },
-  green: { bg: 'bg-green-50', border: 'border-green-300', text: 'text-green-700' },
-  gray: { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-700' },
+  blue: { bg: 'bg-sky-500/10', border: 'border-sky-500/20', text: 'text-sky-300' },
+  green: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-300' },
+  gray: { bg: 'bg-slate-500/10', border: 'border-slate-500/20', text: 'text-slate-300' },
 };
 
 const TIPO_FOTO = ['required', 'optional', 'none'];
@@ -75,7 +75,7 @@ export default function EditTemplate() {
       setAnalises(template.analises || []);
       setNormas(normasData);
     } catch (err) {
-      setErro(err.message || 'Erro ao carregar template');
+      setErro(err.message || 'Erro ao carregar base de análises');
     } finally {
       setCarregando(false);
     }
@@ -100,7 +100,7 @@ export default function EditTemplate() {
       await atualizarTemplate(templateId, nome, descricao, cor);
       setErro('');
     } catch (err) {
-      setErro(err.message || 'Erro ao salvar template');
+      setErro(err.message || 'Erro ao salvar base de análises');
     } finally {
       setSalvando(false);
     }
@@ -225,24 +225,24 @@ export default function EditTemplate() {
   // ────────────────────────────────────────
   if (carregando) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-600 text-lg">Carregando template...</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <p className="text-slate-400 text-lg">Carregando base de análises...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div className="min-h-screen bg-slate-950 p-8">
       <div className="max-w-5xl mx-auto">
         {/* ──── Header ──── */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">✏️ Editar Template</h1>
-            <p className="text-gray-600 mt-2">Configure o nome, descrição e análises</p>
+            <h1 className="text-4xl font-bold text-slate-100">✏️ Editar base de análises</h1>
+            <p className="text-slate-400 mt-2 uppercase text-sm tracking-wide">Administração</p>
           </div>
           <button
             onClick={() => router.back()}
-            className="px-4 py-2 text-gray-600 hover:text-gray-900 font-semibold transition"
+            className="px-4 py-2 text-slate-300 hover:text-slate-100 font-semibold transition"
           >
             ← Voltar
           </button>
@@ -250,19 +250,19 @@ export default function EditTemplate() {
 
         {/* ──── Erro ──── */}
         {erro && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-300">
             ❌ {erro}
           </div>
         )}
 
         {/* ──── Formulário Principal ──── */}
-        <div className="bg-white rounded-lg border border-gray-200 p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Informações do Template</h2>
+        <div className="glass-card rounded-[1.75rem] border-slate-800/90 p-8 mb-8">
+          <h2 className="text-2xl font-bold text-slate-100 mb-6">Informações da base de análises</h2>
 
           <div className="grid grid-cols-2 gap-6 mb-6">
             {/* Nome */}
             <div className="col-span-2 md:col-span-1">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-300 mb-2">
                 Nome *
               </label>
               <input
@@ -270,13 +270,13 @@ export default function EditTemplate() {
                 placeholder="ex: Laudo Completo Couro"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="input-dark w-full rounded-2xl px-4 py-3 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
               />
             </div>
 
             {/* Cor */}
             <div className="col-span-2 md:col-span-1">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-300 mb-2">
                 Cor
               </label>
               <div className="flex gap-3">
@@ -284,10 +284,10 @@ export default function EditTemplate() {
                   <button
                     key={c}
                     onClick={() => setCor(c)}
-                    className={`px-4 py-2 rounded-lg font-semibold transition ${
+                    className={`px-4 py-2 rounded-xl font-semibold transition ${
                       cor === c
-                        ? `ring-2 ring-offset-2 ${COR_MAP[c].bg}`
-                        : `${COR_MAP[c].bg}`
+                        ? `ring-2 ${COR_MAP[c].bg} bg-slate-800/50`
+                        : `bg-slate-800/30 hover:bg-slate-800/50`
                     }`}
                   >
                     {c === 'blue' && '🔵'}
@@ -300,7 +300,7 @@ export default function EditTemplate() {
 
             {/* Descrição */}
             <div className="col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-300 mb-2">
                 Descrição
               </label>
               <textarea
@@ -308,7 +308,7 @@ export default function EditTemplate() {
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="input-dark w-full rounded-2xl px-4 py-3 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70 resize-none"
               />
             </div>
           </div>
@@ -317,16 +317,16 @@ export default function EditTemplate() {
           <button
             onClick={handleSalvarTemplate}
             disabled={salvando}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition disabled:opacity-50"
+            className="button-primary px-6 py-3 text-sm font-semibold shadow-lg shadow-sky-500/20 rounded-xl disabled:opacity-60"
           >
             {salvando ? '💾 Salvando...' : '💾 Salvar Informações'}
           </button>
         </div>
 
         {/* ──── Análises ──── */}
-        <div className="bg-white rounded-lg border border-gray-200 p-8">
+        <div className="glass-card rounded-[1.75rem] border-slate-800/90 p-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-slate-100">
               Análises ({analises.length})
             </h2>
             {!mostraFormAnalise && (
@@ -341,7 +341,7 @@ export default function EditTemplate() {
                   setEditandoAnaliseId(null);
                   setMostraFormAnalise(true);
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition"
+                className="button-primary px-4 py-2 rounded-xl font-semibold"
               >
                 + Adicionar Análise
               </button>
@@ -350,15 +350,15 @@ export default function EditTemplate() {
 
           {/* ──── Formulário de Análise ──── */}
           {mostraFormAnalise && (
-            <div className="mb-8 p-6 bg-blue-50 border-2 border-blue-300 rounded-lg">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <div className="mb-8 p-6 bg-sky-500/10 border-2 border-sky-500/20 rounded-2xl">
+              <h3 className="text-xl font-bold text-slate-100 mb-4">
                 {editandoAnaliseId ? '✏️ Editar Análise' : '➕ Nova Análise'}
               </h3>
 
               <div className="space-y-4">
                 {/* Nome */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">
                     Nome *
                   </label>
                   <input
@@ -368,14 +368,14 @@ export default function EditTemplate() {
                     onChange={(e) =>
                       setAnaliseForm({ ...analiseForm, nome: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="input-dark w-full rounded-xl px-4 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   {/* Norma */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-300 mb-2">
                       Norma
                     </label>
                     <select
@@ -386,7 +386,7 @@ export default function EditTemplate() {
                           norma_id: e.target.value || null,
                         })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-dark w-full rounded-xl px-4 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                     >
                       <option value="">Sem norma</option>
                       {normas.map((n) => (
@@ -399,7 +399,7 @@ export default function EditTemplate() {
 
                   {/* Specification */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-300 mb-2">
                       Specification
                     </label>
                     <input
@@ -412,14 +412,14 @@ export default function EditTemplate() {
                           specification: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-dark w-full rounded-xl px-4 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                     />
                   </div>
                 </div>
 
                 {/* Tipo Foto */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">
                     Tipo de Foto
                   </label>
                   <select
@@ -430,7 +430,7 @@ export default function EditTemplate() {
                         tipo_foto: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="input-dark w-full rounded-xl px-4 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                   >
                     {TIPO_FOTO.map((t) => (
                       <option key={t} value={t}>
@@ -445,7 +445,7 @@ export default function EditTemplate() {
                   <button
                     onClick={handleSalvarAnalise}
                     disabled={salvando}
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition disabled:opacity-50"
+                    className="button-primary px-6 py-2 rounded-xl font-semibold disabled:opacity-60"
                   >
                     {salvando
                       ? '💾 Salvando...'
@@ -465,7 +465,7 @@ export default function EditTemplate() {
                       });
                     }}
                     disabled={salvando}
-                    className="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-semibold transition disabled:opacity-50"
+                    className="button-secondary px-6 py-2 rounded-xl font-semibold disabled:opacity-60"
                   >
                     ❌ Cancelar
                   </button>
@@ -477,31 +477,31 @@ export default function EditTemplate() {
           {/* ──── Lista de Análises ──── */}
           {analises.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-600">Nenhuma análise adicionada ainda</p>
+              <p className="text-slate-400">Nenhuma análise adicionada ainda</p>
             </div>
           ) : (
             <div className="space-y-3">
               {analises.map((analise, idx) => (
                 <div
                   key={analise.id}
-                  className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition"
+                  className="p-4 bg-slate-900/40 rounded-2xl border border-slate-800/60 hover:border-sky-500/30 transition"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h4 className="font-bold text-gray-900">
+                      <h4 className="font-bold text-slate-100">
                         {idx + 1}. {analise.nome}
                       </h4>
                       {analise.norma && (
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-slate-400 mt-1">
                           📚 {analise.norma.codigo} - {analise.norma.descricao}
                         </p>
                       )}
                       {analise.specification && (
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-slate-400">
                           📊 Spec: {analise.specification}
                         </p>
                       )}
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-slate-400">
                         {TIPO_FOTO_LABEL[analise.tipo_foto]}
                       </p>
                     </div>
@@ -510,26 +510,26 @@ export default function EditTemplate() {
                       <button
                         onClick={() => moverAnalise(idx, 'up')}
                         disabled={idx === 0}
-                        className="px-3 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm disabled:opacity-50"
+                        className="px-3 py-1 bg-slate-800/50 text-slate-300 rounded-lg hover:bg-slate-700 text-sm disabled:opacity-40 transition"
                       >
                         ⬆️
                       </button>
                       <button
                         onClick={() => moverAnalise(idx, 'down')}
                         disabled={idx === analises.length - 1}
-                        className="px-3 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm disabled:opacity-50"
+                        className="px-3 py-1 bg-slate-800/50 text-slate-300 rounded-lg hover:bg-slate-700 text-sm disabled:opacity-40 transition"
                       >
                         ⬇️
                       </button>
                       <button
                         onClick={() => abrirEdicaoAnalise(analise)}
-                        className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                        className="px-3 py-1 bg-sky-500/20 text-sky-300 rounded-lg hover:bg-sky-500/30 text-sm transition"
                       >
                         ✏️
                       </button>
                       <button
                         onClick={() => setConfirmandoDeleteAnalise(analise.id)}
-                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                        className="px-3 py-1 bg-rose-500/20 text-rose-300 rounded-lg hover:bg-rose-500/30 text-sm transition"
                       >
                         🗑️
                       </button>
@@ -544,26 +544,26 @@ export default function EditTemplate() {
 
       {/* ──── Modal Confirmar Delete ──── */}
       {confirmandoDeleteAnalise && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="glass-card rounded-[2rem] border-slate-800/90 p-6 max-w-sm">
+            <h3 className="text-lg font-bold text-slate-100 mb-4">
               ⚠️ Deletar Análise?
             </h3>
-            <p className="text-gray-700 mb-6">
-              Tem certeza que deseja remover esta análise do template?
+            <p className="text-slate-400 mb-6">
+              Tem certeza que deseja remover esta análise da base de análises?
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => handleDeletarAnalise(confirmandoDeleteAnalise)}
                 disabled={salvando}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition disabled:opacity-50"
+                className="px-4 py-2 bg-rose-500/20 text-rose-300 rounded-xl hover:bg-rose-500/30 font-semibold transition disabled:opacity-60"
               >
                 {salvando ? '⏳ Deletando...' : '🗑️ Deletar'}
               </button>
               <button
                 onClick={() => setConfirmandoDeleteAnalise(null)}
                 disabled={salvando}
-                className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-semibold transition disabled:opacity-50"
+                className="button-secondary px-4 py-2 rounded-xl font-semibold transition disabled:opacity-60"
               >
                 ❌ Cancelar
               </button>

@@ -34,13 +34,13 @@ export default function NovoLaudo() {
     cliente: '', artigo: '', cor: '', op: '', responsavel: '', observacoes: '',
   });
 
-  // Passo 2 — template + análises
+  // Passo 2 — base de análises
   const [templateId, setTemplateId] = useState('');
   const [analises, setAnalises] = useState([]);
   const [adicionando, setAdicionando] = useState(false);
   const [novaAnalise, setNovaAnalise] = useState(BLANK_ANALISE);
 
-  // ── Carregar templates dinâmicos ──
+  // ── Carregar bases de análises dinâmicas ──
   useEffect(() => {
     async function carregarTemplates() {
       setCarregandoTemplates(true);
@@ -48,7 +48,7 @@ export default function NovoLaudo() {
         const dados = await listarTemplates();
         setTemplates(dados);
       } catch (err) {
-        setErro(err.message || 'Erro ao carregar templates');
+        setErro(err.message || 'Erro ao carregar bases de análises');
       } finally {
         setCarregandoTemplates(false);
       }
@@ -104,7 +104,7 @@ export default function NovoLaudo() {
 
       setAnalises(analisesFormatadas);
     } catch (err) {
-      setErro(err.message || 'Erro ao carregar template');
+      setErro(err.message || 'Erro ao carregar base de análises');
       setTemplateId('');
     }
   }
@@ -127,7 +127,7 @@ export default function NovoLaudo() {
   // ── Criar laudo ──────────────────────────────────────────────
   async function handleCriar() {
     if (!templateId) {
-      setErro('Selecione um template.');
+      setErro('Selecione uma base de análises.');
       return;
     }
     setErro('');
@@ -172,7 +172,7 @@ export default function NovoLaudo() {
         <div className="flex items-center justify-center gap-6 mb-8">
           {[
             { n: 1, label: 'Dados do produto' },
-            { n: 2, label: 'Template e análises' },
+            { n: 2, label: 'Base de análises' },
           ].map(({ n, label }) => (
             <div key={n} className="flex items-center gap-4">
               <div
@@ -272,20 +272,20 @@ export default function NovoLaudo() {
             {/* Template selector */}
             <section className="glass-card rounded-[2rem] border-slate-800/90 p-8">
               <div className="text-center mb-6">
-                <h2 className="text-xl font-bold text-slate-100 mb-2">Selecione o template</h2>
-                <p className="text-slate-400 text-sm">Escolha um template de análises para o laudo</p>
+                <h2 className="text-xl font-bold text-slate-100 mb-2">Selecione a base de análises</h2>
+                <p className="text-slate-400 text-sm">Escolha uma base de análises para o laudo</p>
               </div>
 
               {carregandoTemplates ? (
                 <div className="text-center py-12">
                   <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-slate-400 text-sm">Carregando templates...</p>
+                  <p className="text-slate-400 text-sm">Carregando bases de análises...</p>
                 </div>
               ) : templates.length === 0 ? (
                 <div className="text-center py-12 rounded-[1.75rem] border border-slate-800/80 bg-slate-900/80">
-                  <p className="text-slate-400 text-sm mb-4">Nenhum template disponível</p>
+                  <p className="text-slate-400 text-sm mb-4">Nenhuma base de análises disponível</p>
                   <Link href="/admin/templates" className="button-primary px-6 py-2 text-sm">
-                    Criar primeiro template
+                    Criar primeira base de análises
                   </Link>
                 </div>
               ) : (
@@ -314,15 +314,15 @@ export default function NovoLaudo() {
                 </div>
               )}
 
-              {/* Botão para criar novo template */}
+              {/* Botão para criar nova base de análises */}
               <div className="border-t border-slate-800/50 pt-6">
-                <p className="text-xs text-slate-400 mb-3">Não encontrou o template ideal?</p>
+                <p className="text-xs text-slate-400 mb-3">Não encontrou a base de análises ideal?</p>
                 <Link
                   href="/admin/templates"
                   className="inline-flex items-center gap-2 button-primary px-6 py-3 text-sm font-semibold shadow-lg shadow-emerald-500/20"
                 >
                   <span>+</span>
-                  Criar novo template
+                  Criar nova base de análises
                 </Link>
               </div>
             </section>

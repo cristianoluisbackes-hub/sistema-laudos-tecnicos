@@ -12,9 +12,9 @@ import {
 } from '@/lib/laudosServiceSupabase';
 
 const COR_MAP = {
-  blue: { bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-700', badge: 'bg-blue-100' },
-  green: { bg: 'bg-green-50', border: 'border-green-300', text: 'text-green-700', badge: 'bg-green-100' },
-  gray: { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-700', badge: 'bg-gray-100' },
+  blue: { bg: 'border-sky-500/20 bg-sky-500/10', badge: 'bg-sky-500/15 text-sky-300', btn: 'ring-sky-500/50' },
+  green: { bg: 'border-emerald-500/20 bg-emerald-500/10', badge: 'bg-emerald-500/15 text-emerald-300', btn: 'ring-emerald-500/50' },
+  gray: { bg: 'border-slate-500/20 bg-slate-500/10', badge: 'bg-slate-500/15 text-slate-300', btn: 'ring-slate-500/50' },
 };
 
 export default function AdminTemplates() {
@@ -26,7 +26,7 @@ export default function AdminTemplates() {
   const [erro, setErro] = useState('');
   const [mostrando, setMostrando] = useState('lista');
 
-  // Estados para criar novo template
+  // Estados para criar nova base de análises
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
   const [cor, setCor] = useState('blue');
@@ -49,7 +49,7 @@ export default function AdminTemplates() {
       const dados = await listarTemplates();
       setTemplates(dados);
     } catch (err) {
-      setErro(err.message || 'Erro ao carregar templates');
+      setErro(err.message || 'Erro ao carregar bases de análises');
     } finally {
       setCarregando(false);
     }
@@ -74,7 +74,7 @@ export default function AdminTemplates() {
   }
 
   // ────────────────────────────────────────
-  // Criar novo template
+  // Criar nova base de análises
   // ────────────────────────────────────────
   async function handleCriar() {
     if (!nome.trim()) {
@@ -92,14 +92,14 @@ export default function AdminTemplates() {
       setMostrando('lista');
       await carregarTemplates();
     } catch (err) {
-      setErro(err.message || 'Erro ao criar template');
+      setErro(err.message || 'Erro ao criar base de análises');
     } finally {
       setSalvando(false);
     }
   }
 
   // ────────────────────────────────────────
-  // Clonar template
+  // Clonar base de análises
   // ────────────────────────────────────────
   async function handleClonar(id) {
     const nome = clonarNome.trim();
@@ -116,14 +116,14 @@ export default function AdminTemplates() {
       setClonarNome('');
       await carregarTemplates();
     } catch (err) {
-      setErro(err.message || 'Erro ao clonar template');
+      setErro(err.message || 'Erro ao clonar base de análises');
     } finally {
       setSalvando(false);
     }
   }
 
   // ────────────────────────────────────────
-  // Deletar template
+  // Deletar base de análises
   // ────────────────────────────────────────
   async function handleDeletar(id) {
     setSalvando(true);
@@ -133,26 +133,28 @@ export default function AdminTemplates() {
       setConfirmandoDelete(null);
       await carregarTemplates();
     } catch (err) {
-      setErro(err.message || 'Erro ao deletar template');
+      setErro(err.message || 'Erro ao deletar base de análises');
     } finally {
       setSalvando(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-sky-500/10 via-transparent to-transparent" />
+      <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
         {/* ──── Header ──── */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-3">
-            📋 Gerenciar Templates
+          <p className="text-xs uppercase tracking-[0.3em] text-sky-400/70">Administração</p>
+          <h1 className="text-4xl font-bold tracking-tight text-white flex items-center gap-3">
+            📋 Gerenciar bases de análises
           </h1>
-          <p className="text-gray-600 mt-2">Crie, edite e organize seus templates de laudo</p>
+          <p className="text-slate-400 mt-2">Crie, edite e organize suas bases de análises</p>
         </div>
 
         {/* ──── Erro ──── */}
         {erro && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+          <div className="mb-6 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">
             ❌ {erro}
           </div>
         )}
@@ -170,51 +172,52 @@ export default function AdminTemplates() {
                   setMostrando('criar');
                   setErro('');
                 }}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition flex items-center gap-2"
+                className="button-primary px-6 py-3 text-sm font-semibold shadow-lg shadow-sky-500/20 flex items-center gap-2"
               >
-                + Novo Template
+                + Nova base de análises
               </button>
             </div>
 
-            {/* ──── Lista de Templates ──── */}
+            {/* ──── Lista de bases de análises ──── */}
             {carregando ? (
               <div className="text-center py-12">
-                <p className="text-gray-600">Carregando templates...</p>
+                <div className="animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p className="text-slate-400">Carregando bases de análises...</p>
               </div>
             ) : templates.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <p className="text-gray-600 text-lg">Nenhum template encontrado</p>
-                <p className="text-gray-500">Clique em "+ Novo Template" para começar</p>
+              <div className="text-center py-12 rounded-[1.75rem] border border-slate-800/80 bg-slate-900/80">
+                <p className="text-slate-400 text-lg">Nenhuma base de análises encontrada</p>
+                <p className="text-slate-500 mt-2">Clique em "+ Nova base de análises" para começar</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {templates.map((tpl) => {
-                  const cores = COR_MAP[tpl.cor] || COR_MAP.blue;
+                  const c = COR_MAP[tpl.cor] || COR_MAP.blue;
                   return (
                     <div
                       key={tpl.id}
-                      className={`p-6 rounded-lg border-2 ${cores.border} ${cores.bg} hover:shadow-lg transition`}
+                      className={`glass-card rounded-[1.75rem] border-2 border-slate-800/80 p-6 ${c.bg}`}
                     >
                       {/* Nome */}
-                      <h3 className={`text-xl font-bold ${cores.text} mb-2`}>{tpl.nome}</h3>
+                      <h3 className="text-xl font-bold text-slate-100 mb-2">{tpl.nome}</h3>
 
                       {/* Descrição */}
                       {tpl.descricao && (
-                        <p className="text-gray-600 text-sm mb-4">{tpl.descricao}</p>
+                        <p className="text-slate-400 text-sm mb-4">{tpl.descricao}</p>
                       )}
 
                       {/* Badge de cor */}
                       <div className="mb-4">
-                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${cores.badge}`}>
-                          Cor: {tpl.cor}
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${c.badge}`}>
+                          {tpl.cor}
                         </span>
                       </div>
 
                       {/* Botões de ação */}
-                      <div className="flex gap-2 flex-wrap">
+                      <div className="flex gap-2 flex-wrap pt-4 border-t border-slate-800/50">
                         <Link
                           href={`/admin/templates/${tpl.id}/edit`}
-                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-semibold"
+                          className="button-primary px-4 py-2 text-xs font-semibold rounded-xl transition"
                         >
                           ✏️ Editar
                         </Link>
@@ -223,13 +226,13 @@ export default function AdminTemplates() {
                             setClonarId(tpl.id);
                             setClonarNome(`${tpl.nome} (cópia)`);
                           }}
-                          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm font-semibold"
+                          className="button-secondary px-4 py-2 text-xs font-semibold rounded-xl transition text-slate-300 hover:text-slate-100"
                         >
                           📋 Clonar
                         </button>
                         <button
                           onClick={() => setConfirmandoDelete(tpl.id)}
-                          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm font-semibold"
+                          className="px-4 py-2 bg-rose-500/20 text-rose-300 rounded-xl hover:bg-rose-500/30 transition text-xs font-semibold"
                         >
                           🗑️ Deletar
                         </button>
@@ -244,13 +247,13 @@ export default function AdminTemplates() {
 
         {/* ──── Modo CRIAR ──── */}
         {mostrando === 'criar' && (
-          <div className="bg-white p-8 rounded-lg border border-gray-200 max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">➕ Novo Template</h2>
+          <div className="glass-card rounded-[2rem] border-slate-800/90 p-8 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-slate-100 mb-6">➕ Nova base de análises</h2>
 
             <div className="space-y-5">
               {/* Nome */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-300 mb-2">
                   Nome *
                 </label>
                 <input
@@ -258,13 +261,13 @@ export default function AdminTemplates() {
                   placeholder="ex: Laudo Completo Couro"
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-dark w-full rounded-2xl px-4 py-3 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
                 />
               </div>
 
               {/* Descrição */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-300 mb-2">
                   Descrição
                 </label>
                 <textarea
@@ -272,13 +275,13 @@ export default function AdminTemplates() {
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-dark w-full rounded-2xl px-4 py-3 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70 resize-none"
                 />
               </div>
 
               {/* Cor */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-300 mb-2">
                   Cor
                 </label>
                 <div className="flex gap-3">
@@ -286,10 +289,10 @@ export default function AdminTemplates() {
                     <button
                       key={c}
                       onClick={() => setCor(c)}
-                      className={`px-4 py-2 rounded-lg font-semibold transition ${
+                      className={`px-4 py-2 rounded-xl font-semibold transition ${
                         cor === c
-                          ? `ring-2 ring-offset-2 ${COR_MAP[c].bg} ${COR_MAP[c].border}`
-                          : `${COR_MAP[c].bg} ${COR_MAP[c].border}`
+                          ? `ring-2 ${COR_MAP[c].btn} bg-slate-800/50`
+                          : `bg-slate-800/30 hover:bg-slate-800/50`
                       }`}
                     >
                       {c === 'blue' && '🔵'}
@@ -305,7 +308,7 @@ export default function AdminTemplates() {
                 <button
                   onClick={handleCriar}
                   disabled={salvando}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition disabled:opacity-50"
+                  className="button-primary px-6 py-3 text-sm font-semibold shadow-lg shadow-sky-500/20 rounded-xl disabled:opacity-60"
                 >
                   {salvando ? '💾 Salvando...' : '💾 Salvar'}
                 </button>
@@ -318,7 +321,7 @@ export default function AdminTemplates() {
                     setErro('');
                   }}
                   disabled={salvando}
-                  className="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-semibold transition disabled:opacity-50"
+                  className="button-secondary px-6 py-3 text-sm font-semibold rounded-xl disabled:opacity-60"
                 >
                   ❌ Cancelar
                 </button>
@@ -330,26 +333,26 @@ export default function AdminTemplates() {
 
       {/* ──── Modal de Confirmação Delete ──── */}
       {confirmandoDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="glass-card rounded-[2rem] border-slate-800/90 p-6 max-w-sm">
+            <h3 className="text-lg font-bold text-slate-100 mb-4">
               ⚠️ Confirmar Deleção
             </h3>
-            <p className="text-gray-700 mb-6">
-              Tem certeza que deseja deletar este template? Todas as suas análises também serão removidas.
+            <p className="text-slate-400 mb-6">
+              Tem certeza que deseja deletar esta base de análises? Todas as suas análises também serão removidas.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => handleDeletar(confirmandoDelete)}
                 disabled={salvando}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition disabled:opacity-50"
+                className="px-4 py-2 bg-rose-500/20 text-rose-300 rounded-xl hover:bg-rose-500/30 font-semibold transition disabled:opacity-60"
               >
                 {salvando ? '⏳ Deletando...' : '🗑️ Deletar'}
               </button>
               <button
                 onClick={() => setConfirmandoDelete(null)}
                 disabled={salvando}
-                className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-semibold transition disabled:opacity-50"
+                className="button-secondary px-4 py-2 rounded-xl font-semibold transition disabled:opacity-60"
               >
                 ❌ Cancelar
               </button>
@@ -360,23 +363,23 @@ export default function AdminTemplates() {
 
       {/* ──── Modal de Clonar ──── */}
       {clonarId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
-              📋 Clonar Template
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="glass-card rounded-[2rem] border-slate-800/90 p-6 max-w-sm">
+            <h3 className="text-lg font-bold text-slate-100 mb-4">
+              📋 Clonar base de análises
             </h3>
             <input
               type="text"
-              placeholder="Nome do novo template"
+              placeholder="Nome da nova base de análises"
               value={clonarNome}
               onChange={(e) => setClonarNome(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              className="input-dark w-full rounded-xl px-4 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70 mb-4"
             />
             <div className="flex gap-3">
               <button
                 onClick={() => handleClonar(clonarId)}
                 disabled={salvando}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition disabled:opacity-50"
+                className="button-primary px-4 py-2 rounded-xl font-semibold disabled:opacity-60"
               >
                 {salvando ? '⏳ Clonando...' : '📋 Clonar'}
               </button>
@@ -386,7 +389,7 @@ export default function AdminTemplates() {
                   setClonarNome('');
                 }}
                 disabled={salvando}
-                className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-semibold transition disabled:opacity-50"
+                className="button-secondary px-4 py-2 rounded-xl font-semibold disabled:opacity-60"
               >
                 ❌ Cancelar
               </button>

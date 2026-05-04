@@ -49,23 +49,36 @@ export default function Home() {
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!mounted) return;
-      const u = session?.user ?? null;
-      setUser(u);
-      if (u) await carregarDados();
-      setLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted) return;
+        const u = session?.user ?? null;
+        setUser(u);
+        if (u) await carregarDados();
+      } catch (error) {
+        console.error('Erro ao obter sessão Supabase:', error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (!mounted) return;
         const u = session?.user ?? null;
         setUser(u);
-        if (u) await carregarDados();
-        else setLoading(false);
+        if (u) {
+          await carregarDados();
+          setLoading(false);
+        } else {
+          setLoading(false);
+        }
       }
     );
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
@@ -99,6 +112,12 @@ export default function Home() {
     await carregarDados();
   }
 
+  async function handleLoginSuccess(loggedUser: User) {
+    setUser(loggedUser);
+    await carregarDados();
+    setLoading(false);
+  }
+
   async function handleLogout() {
     await logout();
     setUser(null);
@@ -127,7 +146,7 @@ export default function Home() {
   }
 
   if (!user) {
-    return <LoginSupabase onLoginSuccess={() => {}} />;
+    return <LoginSupabase onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (

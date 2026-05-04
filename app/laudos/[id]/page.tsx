@@ -281,13 +281,14 @@ export default function LaudoDetalhe() {
             <span className="font-mono font-semibold text-white">{laudo.numero}</span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Link
+            <a
               href={`/laudos/${id}/imprimir`}
               target="_blank"
+              rel="noopener noreferrer"
               className="rounded-full border border-slate-700/80 bg-slate-900/95 px-4 py-2 text-sm text-slate-200 transition hover:border-slate-500"
             >
               Imprimir / PDF
-            </Link>
+            </a>
             {!finalizado && (
               <button
                 onClick={handleFinalizar}

@@ -147,19 +147,19 @@ export default function AdminNormas() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div className="min-h-screen bg-slate-950 p-8">
       <div className="max-w-5xl mx-auto">
         {/* ──── Header ──── */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-3">
+          <h1 className="text-4xl font-bold text-slate-100 flex items-center gap-3">
             📋 Gerenciar Normas
           </h1>
-          <p className="text-gray-600 mt-2">Adicione, edite ou remova normas de teste</p>
+          <p className="text-slate-400 mt-2 uppercase text-sm tracking-wide">Administração</p>
         </div>
 
         {/* ──── Erro ──── */}
         {erro && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-300">
             ❌ {erro}
           </div>
         )}
@@ -174,7 +174,7 @@ export default function AdminNormas() {
                 placeholder="Buscar por código ou descrição..."
                 value={filtro}
                 onChange={(e) => handleBuscar(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="input-dark flex-1 rounded-2xl px-4 py-3 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400/70"
               />
               <button
                 onClick={() => {
@@ -184,7 +184,7 @@ export default function AdminNormas() {
                   setMostrando('editar');
                   setErro('');
                 }}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition"
+                className="button-primary px-6 py-3 rounded-2xl font-semibold shadow-lg shadow-sky-500/20"
               >
                 + Nova Norma
               </button>
@@ -193,36 +193,36 @@ export default function AdminNormas() {
             {/* ──── Lista de Normas ──── */}
             {carregando ? (
               <div className="text-center py-12">
-                <p className="text-gray-600">Carregando normas...</p>
+                <p className="text-slate-400">Carregando normas...</p>
               </div>
             ) : normas.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-600 text-lg">Nenhuma norma encontrada</p>
-                <p className="text-gray-500">Clique em "+ Nova Norma" para começar</p>
+                <p className="text-slate-300 text-lg">Nenhuma norma encontrada</p>
+                <p className="text-slate-500">Clique em "+ Nova Norma" para começar</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {normas.map((norma) => (
                   <div
                     key={norma.id}
-                    className="bg-white p-5 rounded-lg border border-gray-200 hover:shadow-md transition flex justify-between items-start"
+                    className="glass-card rounded-[1.75rem] border-slate-800/80 p-5 hover:border-sky-500/30 transition flex justify-between items-start"
                   >
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900">{norma.codigo}</h3>
+                      <h3 className="text-lg font-bold text-slate-100">{norma.codigo}</h3>
                       {norma.descricao && (
-                        <p className="text-gray-600 text-sm mt-1">{norma.descricao}</p>
+                        <p className="text-slate-400 text-sm mt-1">{norma.descricao}</p>
                       )}
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => abrirEdicao(norma)}
-                        className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition text-sm font-semibold"
+                        className="button-secondary px-4 py-2 rounded-xl transition text-sm font-semibold"
                       >
                         ✏️ Editar
                       </button>
                       <button
                         onClick={() => setConfirmandoDelete(norma.id)}
-                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm font-semibold"
+                        className="px-4 py-2 bg-rose-500/20 text-rose-300 rounded-xl hover:bg-rose-500/30 transition text-sm font-semibold"
                       >
                         🗑️ Deletar
                       </button>
